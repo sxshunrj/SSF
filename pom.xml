@@ -9,8 +9,9 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>ssc-client</module>
-        <module>ssc-regcenter</module>
+        <module>ssf-client</module>
+        <module>ssf-regcenter</module>
+        <module>ssf-common</module>
     </modules>
 
 
