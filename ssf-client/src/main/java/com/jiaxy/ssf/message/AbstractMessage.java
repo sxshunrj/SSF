@@ -14,6 +14,19 @@ import io.netty.buffer.ByteBuf;
  */
 public abstract class AbstractMessage {
 
+    //-----------------Message Type----------------------
+    public static final int REQUEST_MSG = 1;
+
+    public static final int RESPONSE_MSG = 2;
+
+    public static final int HEARTBEAT_REQUEST_MSG = 3;
+
+    public static final int HEARTBEAT_RESPONSE_MSG = 4;
+
+    public static final int CALLBACK_REQUEST_MSG = 5;
+
+    public static final int CALLBACK_RESPONSE_MSG = 6;
+
     private MessageHead head;
 
     private ByteBuf msg;
@@ -25,6 +38,52 @@ public abstract class AbstractMessage {
         if ( initMessageHead ){
             head = new MessageHead();
         }
+    }
+
+    public int getMsgId(){
+        if ( head != null ){
+            return head.getMsgId();
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     *
+     * @return true if the message is heartbeat
+     */
+    public boolean isHeartBeatRequestMsg(){
+        int msgType = getHead().getMessageType();
+        if ( msgType == HEARTBEAT_REQUEST_MSG){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return true if the message is heartbeat response
+     */
+    public boolean isHeartBeatResponseMsg(){
+        int msgType = getHead().getMessageType();
+        if ( msgType == HEARTBEAT_RESPONSE_MSG){
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
+     *
+     *
+     * @return
+     */
+    public boolean isCallbackRequestMsg(){
+        int msgType = getHead().getMessageType();
+        if ( msgType == CALLBACK_REQUEST_MSG ){
+            return true;
+        }
+        return false;
     }
 
     public MessageHead getHead() {
@@ -49,5 +108,12 @@ public abstract class AbstractMessage {
 
     public void setMsgBody(ByteBuf msgBody) {
         this.msgBody = msgBody;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractMessage{" +
+                "head=" + head +
+                '}';
     }
 }

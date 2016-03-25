@@ -1,5 +1,11 @@
 package com.jiaxy.ssf.message;
 
+import com.jiaxy.ssf.common.NetUtil;
+import com.jiaxy.ssf.exception.ClientTimeoutException;
+import com.jiaxy.ssf.exception.RpcException;
+import io.netty.channel.Channel;
+
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -15,9 +21,49 @@ import java.util.concurrent.TimeUnit;
  */
 public class MsgFuture<V> implements Future<V>{
 
+    /**
+     * the future created time
+     */
+    private final long createTime = System.currentTimeMillis();
+
+    private Channel channel;
+
+    private volatile long sendTime;
+
+    private int timeout;
+
+    private final AbstractMessage msg;
+
+    private boolean async;
+
+    public MsgFuture(Channel channel, int timeout, AbstractMessage msg) {
+        this.channel = channel;
+        this.timeout = timeout;
+        this.msg = msg;
+    }
+
+    /**
+     * the result
+     */
+    private volatile V result;
+
+
+    private volatile Throwable error;
+
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
-        return false;
+        if (isDone()){
+            return false;
+        }
+        synchronized (this){
+            if (isDone()){
+                return false;
+            }
+            error = new CancellationException();
+            notifyAll();
+
+        }
+        return true;
     }
 
     @Override
@@ -27,16 +73,189 @@ public class MsgFuture<V> implements Future<V>{
 
     @Override
     public boolean isDone() {
-        return false;
+        return isDone0();
     }
 
     @Override
     public V get() throws InterruptedException {
-        return null;
+        return get(timeout,TimeUnit.MILLISECONDS);
     }
 
     @Override
     public V get(long timeout, TimeUnit unit) throws InterruptedException {
-        return null;
+        timeout = unit.toMillis(timeout);
+        long remainingTime = timeout - ( sendTime - createTime );
+        if ( remainingTime <= 0 ){
+            if ( isDone() ){
+                return getNow();
+            }
+        } else  {
+            if ( await(remainingTime,TimeUnit.MILLISECONDS) ){
+                return getNow();
+            }
+        }
+        throw createClientTimeoutException(false);
     }
+
+
+    /**
+     *
+     * @param result
+     */
+    public void setSuccess(V result){
+        if (setSuccess0(result)){
+            //TODO notify listener
+        }
+        throw new IllegalStateException("future completed:"+this);
+    }
+
+    public boolean isSuccess(){
+        if ( result == null || error != null){
+            return false;
+        }
+        return true;
+    }
+
+    public void setSendTime(long sendTime) {
+        this.sendTime = sendTime;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    private ClientTimeoutException createClientTimeoutException(boolean isCheckThread){
+        long current = System.currentTimeMillis();
+        StringBuilder msgSB = new StringBuilder();
+        if ( sendTime > 0 ){
+            msgSB.append("wait provider response timeout.");
+            msgSB.append("client elapsed:");
+            msgSB.append(sendTime - createTime);
+            msgSB.append(" ms");
+            msgSB.append(". server elapsed:");
+            msgSB.append(current - sendTime);
+            msgSB.append(" ms,consumer timeout config:");
+            msgSB.append(timeout);
+            msgSB.append(" ms.");
+            msgSB.append("channel:");
+            msgSB.append(NetUtil.channelToString(channel.localAddress(), channel.remoteAddress()));
+        } else {
+            msgSB.append("consumer send request timeout .");
+            msgSB.append("request time:");
+            msgSB.append(createTime);
+            msgSB.append(",");
+            msgSB.append("end time:");
+            msgSB.append(current);
+            msgSB.append("client elapsed:");
+            msgSB.append(current - createTime);
+            msgSB.append(" ms");
+        }
+        if ( isCheckThread ){
+            msgSB.append(",throws by check thread");
+        }
+        return new ClientTimeoutException(msgSB.toString(),this.msg);
+    }
+
+
+    private boolean await(long remainingTime,TimeUnit unit) throws InterruptedException {
+        return await0(unit.toNanos(remainingTime),true);
+    }
+
+    private boolean await0(long timeoutNanos,boolean interrupt) throws InterruptedException {
+        if ( isDone() ){
+           return true;
+        }
+        if ( timeoutNanos <= 0 ){
+            return isDone();
+        }
+        if (interrupt && Thread.interrupted()){
+            throw new InterruptedException(toString());
+        }
+        long startTime = System.nanoTime();
+        long waitTime = timeoutNanos;
+        boolean interrupted = false;
+        try {
+            synchronized (this){
+                if (isDone()){
+                    return true;
+                }
+                try {
+                    for (;;){
+                        try {
+                            wait(waitTime / 1000000, (int)waitTime % 1000000);
+                        } catch (InterruptedException e){
+                            interrupted = true;
+                        }
+                        if (isDone()){
+                            return true;
+                        } else {
+                            waitTime = timeoutNanos - ( System.nanoTime() - startTime);
+                            if ( waitTime <= 0){
+                                return isDone();
+                            }
+                        }
+                    }
+                } finally {
+
+                }
+            }
+
+        } finally {
+           if ( interrupted ){
+               Thread.currentThread().interrupt();
+           }
+        }
+    }
+
+
+    private boolean isDone0(){
+        return result != null;
+    }
+
+    private boolean setSuccess0(V result){
+        if (isDone()){
+            return false;
+        }
+        synchronized (this){
+            if (isDone()){
+                return false;
+            }
+            this.result = result;
+            notifyAll();
+        }
+        return true;
+    }
+
+    /**
+     *
+     * @return the result
+     */
+    private V getNow(){
+        if ( result == null ){
+            return null;
+        }
+        if ( error != null ){
+            RpcException rpcException;
+            if ( error instanceof RpcException ){
+                rpcException = (RpcException) error;
+                rpcException.setMsg(msg);
+            } else {
+                rpcException = new RpcException(error,msg);
+            }
+            throw rpcException;
+        }
+        if ( result instanceof ResponseMessage ){
+            ResponseMessage resMsg = (ResponseMessage) result;
+            //TODO decode
+
+        }
+        return result;
+
+    }
+
+
 }

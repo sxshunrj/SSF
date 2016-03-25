@@ -1,6 +1,7 @@
 package com.jiaxy.ssf.transport;
 
 import com.jiaxy.ssf.config.ServerTransportConfig;
+import com.jiaxy.ssf.transport.server.SSFServerTransport;
 
 import java.util.concurrent.TimeUnit;
 

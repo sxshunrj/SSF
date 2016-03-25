@@ -1,8 +1,9 @@
-package com.jiaxy.ssf.transport;
+package com.jiaxy.ssf.transport.client;
 
 import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.exception.ClientTimeoutException;
 import com.jiaxy.ssf.exception.RpcException;
+import com.jiaxy.ssf.message.AbstractMessage;
 import com.jiaxy.ssf.message.MsgFuture;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.jiaxy.ssf.message.AbstractMessage.*;
 /**
  * Title: <br>
  * <p>
@@ -24,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @since 2016/03/21 17:51
  */
-public abstract class AbstractTcpClientTransport extends AbstractClientTransport{
+public abstract class AbstractTcpClientTransport extends AbstractClientTransport {
 
     private Logger logger = LoggerFactory.getLogger(AbstractTcpClientTransport.class);
 
@@ -38,8 +40,8 @@ public abstract class AbstractTcpClientTransport extends AbstractClientTransport
     private final ConcurrentHashMap<Integer,MsgFuture> msgFutureMap = new ConcurrentHashMap<Integer, MsgFuture>();
 
 
-    public AbstractTcpClientTransport(ClientTransportConfig clientTransportConfig) {
-        super(clientTransportConfig);
+    public AbstractTcpClientTransport(String ip,int port,ClientTransportConfig clientTransportConfig) {
+        super(ip,port,clientTransportConfig);
     }
 
     @Override
@@ -53,7 +55,7 @@ public abstract class AbstractTcpClientTransport extends AbstractClientTransport
             return msgFuture.get(timeout, TimeUnit.MILLISECONDS);
 
         } catch (InterruptedException e){
-            throw new RpcException("request thread interrupted",e);
+            throw new RpcException("request thread interrupted",e,msg);
         } catch (ClientTimeoutException e) {
             msgFutureMap.remove(msgId);
             throw e;
@@ -79,9 +81,41 @@ public abstract class AbstractTcpClientTransport extends AbstractClientTransport
         }
     }
 
+
+    /**
+     * handle the response message
+     *
+     * @param responseMessage
+     */
+    public void handleResponse(ResponseMessage responseMessage){
+        Integer msgId = responseMessage.getMsgId();
+        MsgFuture future = msgFutureMap.get(msgId);
+        if ( future == null ){
+            logger.warn("MsgId[{}] MsgFuture no exist when handle the response message.Maybe has been removed for timeout",msgId);
+            return;
+        }
+        future.setSuccess(responseMessage);
+        msgFutureMap.remove(msgId);
+
+
+    }
+
     abstract MsgFuture doSendAsync(RequestMessage msg,int timeout);
 
     private Integer generateMsgId(){
+
         return msgId.getAndIncrement();
+    }
+
+    protected void addMsgFuture(AbstractMessage msg,MsgFuture msgFuture){
+        int msgType = msg.getHead().getMessageType();
+        int msgId = msg.getMsgId();
+        if ( msgType == REQUEST_MSG ||
+             msgType == HEARTBEAT_REQUEST_MSG ||
+             msgType == CALLBACK_REQUEST_MSG){
+           msgFutureMap.put(msgId,msgFuture);
+        } else {
+            logger.error("can't handle this type message:{}",msg);
+        }
     }
 }

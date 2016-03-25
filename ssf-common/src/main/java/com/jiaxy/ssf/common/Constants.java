@@ -15,7 +15,6 @@ public class Constants {
      */
     public static final int DEFAULT_CLIENT_CONNECT_TIMEOUT = 5000;
 
-
     public static final int CPU_CORES = CommonUtil.getCpuCores();
 
     public static final boolean WINDOWS = CommonUtil.isWindows();

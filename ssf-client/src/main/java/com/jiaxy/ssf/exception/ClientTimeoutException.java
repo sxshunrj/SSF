@@ -1,5 +1,7 @@
 package com.jiaxy.ssf.exception;
 
+import com.jiaxy.ssf.message.AbstractMessage;
+
 /**
  * Title: <br>
  * <p>
@@ -12,18 +14,20 @@ package com.jiaxy.ssf.exception;
  */
 public class ClientTimeoutException extends RpcException {
 
-    public ClientTimeoutException() {
+
+    public ClientTimeoutException(AbstractMessage msg) {
+        super(msg);
     }
 
-    public ClientTimeoutException(String message) {
-        super(message);
+    public ClientTimeoutException(String message, AbstractMessage msg) {
+        super(message, msg);
     }
 
-    public ClientTimeoutException(String message, Throwable cause) {
-        super(message, cause);
+    public ClientTimeoutException(String message, Throwable cause, AbstractMessage msg) {
+        super(message, cause, msg);
     }
 
-    public ClientTimeoutException(Throwable cause) {
-        super(cause);
+    public ClientTimeoutException(Throwable cause, AbstractMessage msg) {
+        super(cause, msg);
     }
 }

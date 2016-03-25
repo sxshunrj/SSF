@@ -4,6 +4,8 @@ import com.jiaxy.ssf.common.CodecType;
 import com.jiaxy.ssf.common.CompressType;
 import com.jiaxy.ssf.common.ProtocolType;
 
+import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 2016/03/21 14:49
  */
-public class MessageHead {
+public class MessageHead implements Serializable,Cloneable {
 
     private int fullLength;
 
@@ -33,9 +35,6 @@ public class MessageHead {
     private int msgId;
 
     private ConcurrentHashMap<String,Object> attrMap = new ConcurrentHashMap<String, Object>();
-
-
-
 
     public int getFullLength() {
         return fullLength;
@@ -101,5 +100,29 @@ public class MessageHead {
         this.attrMap = attrMap;
     }
 
+    @Override
+    public MessageHead clone(){
+        MessageHead clonedHead = new MessageHead();
+        clonedHead.setFullLength(this.fullLength);
+        clonedHead.setHeadLength(this.headLength);
+        clonedHead.setCodecType(this.codecType);
+        clonedHead.setCompressType(this.compressType);
+        clonedHead.setMessageType(this.messageType);
+        clonedHead.setMsgId(this.msgId);
+        clonedHead.setProtocolType(this.protocolType);
+        clonedHead.getAttrMap().putAll(this.attrMap);
+        return clonedHead;
+    }
 
+    @Override
+    public String toString() {
+        return "MessageHead{" +
+                "protocolType=" + protocolType +
+                ", codecType=" + codecType +
+                ", messageType=" + messageType +
+                ", compressType=" + compressType +
+                ", msgId=" + msgId +
+                ", attrMap=" + attrMap +
+                '}';
+    }
 }

@@ -1,6 +1,7 @@
-package com.jiaxy.ssf.transport;
+package com.jiaxy.ssf.transport.client;
 
 import com.jiaxy.ssf.config.ClientTransportConfig;
+import com.jiaxy.ssf.transport.client.ClientTransport;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,6 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class AbstractClientTransport implements ClientTransport {
 
+    protected String remoteIP;
+
+    protected int remotePort;
+
     protected InetSocketAddress localAddress;
 
     protected InetSocketAddress remoteAddress;
@@ -25,7 +30,9 @@ public abstract class AbstractClientTransport implements ClientTransport {
 
     protected AtomicInteger currentRequests = new AtomicInteger();
 
-    public AbstractClientTransport(ClientTransportConfig clientTransportConfig) {
+    public AbstractClientTransport(String ip,int port,ClientTransportConfig clientTransportConfig) {
+        this.remoteIP = ip;
+        this.remotePort = port;
         this.clientTransportConfig = clientTransportConfig;
     }
 

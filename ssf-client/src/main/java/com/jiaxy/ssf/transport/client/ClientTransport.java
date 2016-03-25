@@ -1,4 +1,4 @@
-package com.jiaxy.ssf.transport;
+package com.jiaxy.ssf.transport.client;
 
 import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.message.MsgFuture;

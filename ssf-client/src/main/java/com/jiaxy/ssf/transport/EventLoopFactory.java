@@ -1,6 +1,7 @@
 package com.jiaxy.ssf.transport;
 
 import com.jiaxy.ssf.common.Constants;
+import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.config.ServerTransportConfig;
 import com.jiaxy.ssf.thread.NamedThreadFactory;
 import io.netty.channel.EventLoopGroup;
@@ -26,6 +27,8 @@ public class EventLoopFactory {
 
     private static EventLoopGroup workerEventLoopGroup;
 
+    private static EventLoopGroup clientEventLoopGroup;
+
 
     /**
      *
@@ -33,7 +36,7 @@ public class EventLoopFactory {
      * @return singleton boos event loop group
      */
     public static EventLoopGroup getSharedBossEventLoopGroup(ServerTransportConfig config){
-        if ( bossEventLoopGroup == null ){
+        if ( bossEventLoopGroup == null || bossEventLoopGroup.isShutdown() ){
            synchronized (EventLoopFactory.class){
                if ( bossEventLoopGroup == null ){
                    bossEventLoopGroup = createBossEventLoopGroup(config);
@@ -44,7 +47,7 @@ public class EventLoopFactory {
     }
 
     public static EventLoopGroup getSharedWorkerEventLoopGroup(ServerTransportConfig config){
-        if ( workerEventLoopGroup == null ){
+        if ( workerEventLoopGroup == null || workerEventLoopGroup.isShutdown() ){
            synchronized (EventLoopFactory.class){
                if ( workerEventLoopGroup == null ){
                    workerEventLoopGroup = createWorkerEventLoopGroup(config);
@@ -52,6 +55,18 @@ public class EventLoopFactory {
            }
         }
         return workerEventLoopGroup;
+    }
+
+
+    public static EventLoopGroup getSharedClientEventLoopGroup(ClientTransportConfig config){
+        if ( clientEventLoopGroup == null ){
+            synchronized (EventLoopFactory.class){
+                if ( clientEventLoopGroup == null || clientEventLoopGroup.isShutdown() ){
+                    clientEventLoopGroup = createClientEventLoopGroup(config);
+                }
+            }
+        }
+        return clientEventLoopGroup;
     }
 
     public static EventLoopGroup createBossEventLoopGroup(ServerTransportConfig config){
@@ -76,6 +91,21 @@ public class EventLoopFactory {
             threads = Math.max(8,Constants.CPU_CORES + 1);
         }
         NamedThreadFactory threadFactory = new NamedThreadFactory("SSF-WORKER-");
+        EventLoopGroup eventLoopGroup;
+        if ( config.isEpoll() ){
+            eventLoopGroup = new EpollEventLoopGroup(threads,threadFactory);
+        } else {
+            eventLoopGroup = new NioEventLoopGroup(threads,threadFactory);
+        }
+        return eventLoopGroup;
+    }
+
+    public static EventLoopGroup createClientEventLoopGroup(ClientTransportConfig config){
+        int threads = config.getChildNioEventThreads();
+        if ( threads == 0 ){
+            threads = Math.max(6,Constants.CPU_CORES + 1);
+        }
+        NamedThreadFactory threadFactory = new NamedThreadFactory("SSF-Client-WORKER");
         EventLoopGroup eventLoopGroup;
         if ( config.isEpoll() ){
             eventLoopGroup = new EpollEventLoopGroup(threads,threadFactory);
