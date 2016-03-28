@@ -47,6 +47,14 @@ public class RequestMessage extends AbstractMessage {
         this.remoteAddress = remoteAddress;
     }
 
+    public MessageBody getMessageBody() {
+        return messageBody;
+    }
+
+    public void setMessageBody(MessageBody messageBody) {
+        this.messageBody = messageBody;
+    }
+
     public void setRequestMsgId(Integer msgId){
         if ( getHead() != null ){
             getHead().setMsgId(msgId);

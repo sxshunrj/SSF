@@ -34,7 +34,7 @@ public class MessageHead implements Serializable,Cloneable {
 
     private int msgId;
 
-    private ConcurrentHashMap<String,Object> attrMap = new ConcurrentHashMap<String, Object>();
+    private ConcurrentHashMap<Byte,Object> attrMap = new ConcurrentHashMap<Byte, Object>();
 
     public int getFullLength() {
         return fullLength;
@@ -92,12 +92,8 @@ public class MessageHead implements Serializable,Cloneable {
         this.msgId = msgId;
     }
 
-    public ConcurrentHashMap<String, Object> getAttrMap() {
+    public ConcurrentHashMap<Byte, Object> getAttrMap() {
         return attrMap;
-    }
-
-    public void setAttrMap(ConcurrentHashMap<String, Object> attrMap) {
-        this.attrMap = attrMap;
     }
 
     @Override
