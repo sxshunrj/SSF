@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @since 2016/03/21 16:57
  */
-public class MessageBody implements Serializable {
+public class RequestMessageBody implements Serializable {
 
 
     private String className;

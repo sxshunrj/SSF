@@ -1,13 +1,19 @@
 package com.jiaxy.ssf.transport.client;
 
+import com.jiaxy.ssf.codec.protocol.Protocol;
+import com.jiaxy.ssf.codec.protocol.ProtocolFactory;
+import com.jiaxy.ssf.common.CodecType;
+import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.exception.InitException;
 import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.message.MsgFuture;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
+import com.jiaxy.ssf.transport.ByteBufAllocatorHolder;
 import com.jiaxy.ssf.transport.EventLoopFactory;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollSocketChannel;
@@ -47,7 +53,12 @@ public class SSFClientTransport extends AbstractTcpClientTransport {
         }
         MsgFuture<ResponseMessage> msgFuture = new MsgFuture<ResponseMessage>(channel,timeout,msg);
         addMsgFuture(msg,msgFuture);
-        //TODO encode
+        Protocol protocol = ProtocolFactory.getProtocol(ProtocolType.valueOf(msg.getHead().getProtocolType()),
+                CodecType.valueOf(msg.getHead().getCodecType()));
+        ByteBuf buf = ByteBufAllocatorHolder.getBuf();
+        //encode
+        protocol.encode(msg,buf);
+        msg.setMsgBuf(buf);
         channel.writeAndFlush(msg,channel.voidPromise());
         msgFuture.setSendTime(System.currentTimeMillis());
         return msgFuture;

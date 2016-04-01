@@ -14,6 +14,7 @@ import com.jiaxy.ssf.common.CodecType;
 import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.exception.InitException;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.jiaxy.ssf.common.ProtocolType.*;
@@ -49,6 +50,27 @@ public class ProtocolFactory {
             }
         }
         return protocol;
+    }
+
+
+    /**
+     *
+     * @param protocolType
+     *
+     * @return one protocol instance only by protocol type
+     */
+    public static Protocol getProtocol(ProtocolType protocolType){
+        for ( CodecType codecType : CodecType.values() ){
+            Protocol protocol = protocolMap.get(createProtocolKey(protocolType,codecType));
+            if ( protocol != null ){
+                return protocol;
+            }
+        }
+        return null;
+    }
+
+    public static Protocol getProtocol(byte protocolType,byte decType){
+        return getProtocol(ProtocolType.valueOf(protocolType),CodecType.valueOf(decType));
     }
 
     private static Protocol initProtocol(ProtocolType protocolType,CodecType codecType){

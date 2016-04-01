@@ -25,4 +25,13 @@ public enum ProtocolType {
     public byte getValue() {
         return value;
     }
+
+    public static ProtocolType valueOf(byte value){
+        for (ProtocolType protocolType : ProtocolType.values()){
+            if ( protocolType.getValue() == value ){
+                return protocolType;
+            }
+        }
+        return null;
+    }
 }

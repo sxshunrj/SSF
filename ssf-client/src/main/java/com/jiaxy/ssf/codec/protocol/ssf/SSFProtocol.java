@@ -6,7 +6,7 @@ import com.jiaxy.ssf.codec.serialization.Encoder;
 import com.jiaxy.ssf.common.Constants;
 import com.jiaxy.ssf.common.DataTypeUtil;
 import com.jiaxy.ssf.exception.SSFCodecException;
-import com.jiaxy.ssf.message.MessageBody;
+import com.jiaxy.ssf.message.RequestMessageBody;
 import com.jiaxy.ssf.message.MessageHead;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
@@ -70,6 +70,8 @@ public class SSFProtocol implements Protocol {
 
     private static final Logger logger = LoggerFactory.getLogger(SSFProtocol.class);
 
+    public static final byte[] MAGIC_CODE_BYTES = new byte[]{(byte)0xCE,(byte)0xEC};
+
     private Encoder encoder;
 
     private Decoder decoder;
@@ -98,7 +100,7 @@ public class SSFProtocol implements Protocol {
         if ( obj instanceof RequestMessage ){
             RequestMessage requestMessage = (RequestMessage) obj;
             MessageHead messageHead = requestMessage.getHead();
-            MessageBody messageBody = requestMessage.getMessageBody();
+            RequestMessageBody messageBody = requestMessage.getRequestMessageBody();
             messageHead.setHeadLength(encodeMessageHead(messageHead,buf));
             if ( messageBody != null ){
                 byte[] messageBodyByteArr = encoder.encode(messageBody);
@@ -230,6 +232,9 @@ public class SSFProtocol implements Protocol {
             }
         }
     }
+
+
+
 
 
 }

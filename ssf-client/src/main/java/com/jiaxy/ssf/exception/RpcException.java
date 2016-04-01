@@ -73,4 +73,14 @@ public class RpcException extends RuntimeException implements Serializable {
         }
         return rpcException;
     }
+
+    public static RpcException convertToRpcException(Throwable e){
+        RpcException rpcException;
+        if ( e instanceof RpcException ){
+            rpcException = (RpcException) e;
+        } else {
+            return new RpcException(e);
+        }
+        return rpcException;
+    }
 }

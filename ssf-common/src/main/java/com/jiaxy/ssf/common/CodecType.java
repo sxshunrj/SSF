@@ -32,4 +32,13 @@ public enum CodecType {
     public byte getValue() {
         return value;
     }
+
+    public static CodecType valueOf(byte value){
+        for ( CodecType codecType : CodecType.values() ){
+            if ( codecType.getValue() == value ){
+                return codecType;
+            }
+        }
+        return null;
+    }
 }

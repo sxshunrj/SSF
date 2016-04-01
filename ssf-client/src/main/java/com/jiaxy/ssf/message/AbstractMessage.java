@@ -2,6 +2,8 @@ package com.jiaxy.ssf.message;
 
 import io.netty.buffer.ByteBuf;
 
+import java.io.Serializable;
+
 /**
  * Title: <br>
  * <p>
@@ -12,7 +14,7 @@ import io.netty.buffer.ByteBuf;
  *
  * @since 2016/03/21 14:48
  */
-public abstract class AbstractMessage {
+public abstract class AbstractMessage implements Serializable{
 
     //-----------------Message Type----------------------
     public static final int REQUEST_MSG = 1;
@@ -29,9 +31,9 @@ public abstract class AbstractMessage {
 
     private MessageHead head;
 
-    private ByteBuf msg;
+    private ByteBuf msgBuf;
 
-    private ByteBuf msgBody;
+    private ByteBuf msgBodyBuf;
 
 
     protected AbstractMessage(boolean initMessageHead){
@@ -73,6 +75,11 @@ public abstract class AbstractMessage {
     }
 
 
+    public boolean isHeartBeat(){
+        return isHeartBeatRequestMsg() || isHeartBeatResponseMsg();
+    }
+
+
     /**
      *
      *
@@ -94,25 +101,25 @@ public abstract class AbstractMessage {
         this.head = head;
     }
 
-    public ByteBuf getMsg() {
-        return msg;
+    public ByteBuf getMsgBuf() {
+        return msgBuf;
     }
 
-    public void setMsg(ByteBuf msg) {
-        this.msg = msg;
+    public void setMsgBuf(ByteBuf msgBuf) {
+        this.msgBuf = msgBuf;
     }
 
-    public ByteBuf getMsgBody() {
-        return msgBody;
+    public ByteBuf getMsgBodyBuf() {
+        return msgBodyBuf;
     }
 
-    public void setMsgBody(ByteBuf msgBody) {
-        this.msgBody = msgBody;
+    public void setMsgBodyBuf(ByteBuf msgBodyBuf) {
+        this.msgBodyBuf = msgBodyBuf;
     }
 
     @Override
     public String toString() {
-        return "AbstractMessage{" +
+        return "{" +
                 "head=" + head +
                 '}';
     }

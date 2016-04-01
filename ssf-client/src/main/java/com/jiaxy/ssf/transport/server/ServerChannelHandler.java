@@ -51,7 +51,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             //TODO handle callback
         } else {
             logger.error("unknown message type . msg :{}",msg);
-            throw new RpcException("unknown message type",null);
+            throw new RpcException("unknown message type");
         }
     }
 

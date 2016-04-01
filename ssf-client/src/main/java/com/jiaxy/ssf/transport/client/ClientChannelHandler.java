@@ -65,14 +65,14 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             } else if ( msg instanceof AbstractMessage ){
                 throw new RpcException("error type of message", (AbstractMessage) msg);
             } else {
-                throw new RpcException("the message is not ssf message",null);
+                throw new RpcException("the message is not ssf message");
             }
         } catch (Exception e){
             logger.error(e.getMessage(),e);
             if ( msg instanceof AbstractMessage ){
                 throw RpcException.convertToRpcException((AbstractMessage) msg,e);
             } else {
-                throw new RpcException("the message is not ssf message",null);
+                throw new RpcException("the message is not ssf message");
             }
         }
     }

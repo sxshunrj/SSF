@@ -20,7 +20,7 @@ public class RequestMessage extends AbstractMessage {
 
     private String remoteAddress;
 
-    private MessageBody messageBody;
+    private RequestMessageBody requestMessageBody;
 
 
     public RequestMessage(boolean initMessageHead) {
@@ -47,12 +47,12 @@ public class RequestMessage extends AbstractMessage {
         this.remoteAddress = remoteAddress;
     }
 
-    public MessageBody getMessageBody() {
-        return messageBody;
+    public RequestMessageBody getRequestMessageBody() {
+        return requestMessageBody;
     }
 
-    public void setMessageBody(MessageBody messageBody) {
-        this.messageBody = messageBody;
+    public void setRequestMessageBody(RequestMessageBody requestMessageBody) {
+        this.requestMessageBody = requestMessageBody;
     }
 
     public void setRequestMsgId(Integer msgId){
