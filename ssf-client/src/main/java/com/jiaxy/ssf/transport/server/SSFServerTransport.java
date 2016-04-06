@@ -52,7 +52,7 @@ public class SSFServerTransport implements ServerTransport {
         serverBootstrap.group(EventLoopFactory.getSharedBossEventLoopGroup(serverTransportConfig),
                               EventLoopFactory.getSharedWorkerEventLoopGroup(serverTransportConfig))
                 .channel(clz)
-                .childHandler(new ServerChannelInitializer())
+                .childHandler(new ServerChannelInitializer(serverTransportConfig,new ServerChannelHandler(serverTransportConfig)))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,serverTransportConfig.getConnectionTimeout())
                 .option(ChannelOption.SO_BACKLOG,serverTransportConfig.getBACKLOG())
                 .option(ChannelOption.SO_REUSEADDR, !Constants.WINDOWS)

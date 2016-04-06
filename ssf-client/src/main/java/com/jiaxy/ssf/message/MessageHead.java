@@ -20,6 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MessageHead implements Serializable,Cloneable {
 
+    //----------------HEAD ATTR CONSTANTS-------------
+    //client call time out key
+    public static final Byte CLIENT_CALL_TIMEOUT = (byte)1;
+
+
     private int fullLength;
 
     private short headLength;
@@ -94,6 +99,10 @@ public class MessageHead implements Serializable,Cloneable {
 
     public ConcurrentHashMap<Byte, Object> getAttrMap() {
         return attrMap;
+    }
+
+    public Object getAttrValue(Byte key){
+        return attrMap.get(key);
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.jiaxy.ssf.transport.client;
 
-import com.jiaxy.ssf.common.NetUtil;
 import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.message.AbstractMessage;
 import com.jiaxy.ssf.message.MessageHead;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
+import com.jiaxy.ssf.util.NetUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -59,7 +59,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 } else {
                     Channel channel = ctx.channel();
                     throw new RpcException(String.format("the message should be callback request in channel %s ,but is:%s",
-                            NetUtil.channelToString(channel.localAddress(),channel.remoteAddress()),
+                            NetUtil.channelToString(channel.localAddress(), channel.remoteAddress()),
                             requestMessage),requestMessage);
                 }
             } else if ( msg instanceof AbstractMessage ){

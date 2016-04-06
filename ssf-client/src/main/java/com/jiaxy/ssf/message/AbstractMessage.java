@@ -93,12 +93,22 @@ public abstract class AbstractMessage implements Serializable{
         return false;
     }
 
+
+    public byte getProtocolType(){
+        return getHead().getProtocolType();
+    }
+
+    public byte getCodecType(){
+        return getHead().getCodecType();
+    }
+
     public MessageHead getHead() {
         return head;
     }
 
     public void setHead(MessageHead head) {
         this.head = head;
+
     }
 
     public ByteBuf getMsgBuf() {

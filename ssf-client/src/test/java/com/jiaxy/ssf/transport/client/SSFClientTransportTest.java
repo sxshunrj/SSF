@@ -3,7 +3,10 @@ package com.jiaxy.ssf.transport.client;
 import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.config.ServerTransportConfig;
+import com.jiaxy.ssf.message.MsgFuture;
+import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.transport.server.SSFServerTransport;
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,28 +27,33 @@ public class SSFClientTransportTest {
         ssfServerTransport = new SSFServerTransport(new ServerTransportConfig());
         ssfServerTransport.start();
         ssfClientTransport = ClientTransportFactory.getClientTransport(new ClientTransportFactory.ClientTransportKey(ProtocolType.SSF,"localhost",31616),new ClientTransportConfig());
-        System.out.println("-----------start------------");
     }
 
     @After
     public void tearDown() throws Exception {
         ssfServerTransport.stop();
-        System.out.println("-----------stop------------");
-
     }
 
     @Test
     public void testDoSendAsync() throws Exception {
-
+        MsgFuture msgFuture = ssfClientTransport.sendAsync(new RequestMessage(), 5000);
+        Object rs = null;
+        try {
+            rs = msgFuture.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(rs);
     }
 
     @Test
     public void testConnect() throws Exception {
         ssfClientTransport.connect();
-        TimeUnit.MINUTES.sleep(1);
-        ssfClientTransport.disConnect();
-        TimeUnit.MINUTES.sleep(1);
+    }
 
+     @Test
+    public void testIsConnected() throws Exception {
+        Assert.assertEquals(true,ssfClientTransport.isConnected());
     }
 
     @Test
@@ -53,8 +61,5 @@ public class SSFClientTransportTest {
         ssfClientTransport.disConnect();
     }
 
-    @Test
-    public void testIsConnected() throws Exception {
 
-    }
 }

@@ -14,7 +14,7 @@ package com.jiaxy.ssf.message;
 public class RequestMessage extends AbstractMessage {
 
     /**
-     * 接受请求时间,即创建时间
+     * the time received the request
      */
     private long receivedTime;
 
@@ -25,11 +25,53 @@ public class RequestMessage extends AbstractMessage {
 
     public RequestMessage(boolean initMessageHead) {
         super(initMessageHead);
+        if ( getHead() != null ){
+            getHead().setMessageType(REQUEST_MSG);
+        }
     }
 
     public RequestMessage(){
         super(true);
+        getHead().setMessageType(REQUEST_MSG);
     }
+
+    /**
+     *
+     * @return time out config of the client call
+     */
+    public Integer getCallTimeout(){
+        Integer timeout = (Integer) getHead().getAttrValue(MessageHead.CLIENT_CALL_TIMEOUT);
+        if ( timeout == null ){
+            return null;
+        }
+        return timeout;
+    }
+
+
+    public String getServiceName(){
+        if ( requestMessageBody != null ){
+            return requestMessageBody.getClassName();
+        } else {
+            return null;
+        }
+    }
+
+    public String getMethodName(){
+        if ( requestMessageBody != null ){
+            return requestMessageBody.getMethodName();
+        } else {
+            return null;
+        }
+    }
+
+    public String getAlias(){
+        if ( requestMessageBody != null ){
+            return requestMessageBody.getAlias();
+        } else {
+            return null;
+        }
+    }
+
 
     public long getReceivedTime() {
         return receivedTime;
@@ -59,5 +101,14 @@ public class RequestMessage extends AbstractMessage {
         if ( getHead() != null ){
             getHead().setMsgId(msgId);
         }
+    }
+
+    @Override
+    public void setHead(MessageHead head) {
+        super.setHead(head);
+        if ( this.getHead() != null ){
+            this.getHead().setMessageType(REQUEST_MSG);
+        }
+
     }
 }

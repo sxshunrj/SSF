@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 public interface Protocol {
 
 
-    Object decode(ByteBuf data,Class clz);
+    <T> T decode(ByteBuf data,Class<T> clz);
 
     Object decode(ByteBuf data,String clzName);
 

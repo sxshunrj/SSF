@@ -1,8 +1,8 @@
 package com.jiaxy.ssf.message;
 
-import com.jiaxy.ssf.common.NetUtil;
 import com.jiaxy.ssf.exception.ClientTimeoutException;
 import com.jiaxy.ssf.exception.RpcException;
+import com.jiaxy.ssf.util.NetUtil;
 import io.netty.channel.Channel;
 
 import java.util.concurrent.CancellationException;
@@ -105,6 +105,7 @@ public class MsgFuture<V> implements Future<V>{
     public void setSuccess(V result){
         if (setSuccess0(result)){
             //TODO notify listener
+            return;
         }
         throw new IllegalStateException("future completed:"+this);
     }
@@ -186,7 +187,7 @@ public class MsgFuture<V> implements Future<V>{
                 try {
                     for (;;){
                         try {
-                            wait(waitTime / 1000000, (int)waitTime % 1000000);
+                            wait(waitTime / 1000000, (int)(waitTime % 1000000));
                         } catch (InterruptedException e){
                             interrupted = true;
                         }

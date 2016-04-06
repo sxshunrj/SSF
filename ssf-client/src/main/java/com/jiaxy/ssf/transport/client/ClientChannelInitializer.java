@@ -1,8 +1,11 @@
 package com.jiaxy.ssf.transport.client;
 
+import com.jiaxy.ssf.codec.protocol.ssf.ByteToSSFMessageDecoder;
+import com.jiaxy.ssf.codec.protocol.ssf.SSFMessageToByteEncoder;
 import com.jiaxy.ssf.config.ClientTransportConfig;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 
 /**
@@ -29,6 +32,9 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel>{
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
-
+        ChannelPipeline pipeline = ch.pipeline();
+        pipeline.addLast(new SSFMessageToByteEncoder())
+                .addLast(new ByteToSSFMessageDecoder(clientTransportConfig.getPayload()))
+                .addLast(clientChannelHandler);
     }
 }

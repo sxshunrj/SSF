@@ -42,4 +42,8 @@ public class NamedThreadFactory implements ThreadFactory{
         thread.setPriority(Thread.NORM_PRIORITY);
         return thread;
     }
+
+    public void setDaemon(boolean isDaemon) {
+        this.isDaemon = isDaemon;
+    }
 }

@@ -19,7 +19,7 @@ public class ServerTransportConfig {
     private String host = "localhost";
 
     /**
-     * 发布的协议
+     * protocol type
      */
     private ProtocolType protocolType = ProtocolType.SSF;
 
@@ -28,36 +28,35 @@ public class ServerTransportConfig {
     private int connectionTimeout = 5000;
 
     /**
-     * 服务端默认线程池大小
+     * thread pool max size
      */
     private int bizPoolSize = 200;
 
     /**
-     * boss线程数目
+     * boss thread num
      */
     private int bossNioEventThreads = 0;
 
 
     /**
-     * io 线程数目
+     * io thread num
      */
     private int workerNioEventThreads = 0;
 
 
     /**
-     * 最大数据包 8M
+     * payload 8M
      */
     private int payload = 8 * 1024 * 1024;
 
     /**
-     * 是否开启epoll
+     * epoll or not
      */
     private boolean epoll = false;
 
     private boolean keepAlive = true;
 
     private boolean tcpNoDelay = true;
-
 
     public int getPort() {
         return port;

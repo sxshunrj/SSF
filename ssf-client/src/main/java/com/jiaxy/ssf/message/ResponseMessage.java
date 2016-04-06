@@ -25,10 +25,14 @@ public class ResponseMessage<T> extends AbstractMessage{
 
     public ResponseMessage(boolean initMessageHead) {
         super(initMessageHead);
+        if ( getHead() != null ){
+            getHead().setMessageType(RESPONSE_MSG);
+        }
     }
 
     public ResponseMessage(){
         super(true);
+        getHead().setMessageType(RESPONSE_MSG);
     }
 
     public boolean isError(){
@@ -50,5 +54,13 @@ public class ResponseMessage<T> extends AbstractMessage{
 
     public void setException(Throwable exception) {
         this.exception = exception;
+    }
+
+    @Override
+    public void setHead(MessageHead head) {
+        super.setHead(head);
+        if ( this.getHead() != null ){
+            this.getHead().setMessageType(RESPONSE_MSG);
+        }
     }
 }

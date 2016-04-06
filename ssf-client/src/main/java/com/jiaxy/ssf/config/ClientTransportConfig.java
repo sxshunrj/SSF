@@ -19,6 +19,9 @@ public class ClientTransportConfig {
 
     private boolean epoll = false;
 
+    private int payload = 8 * 1024 * 1024;
+
+
     public int getConnectionTimeout() {
         return connectionTimeout;
     }
@@ -41,5 +44,13 @@ public class ClientTransportConfig {
 
     public void setEpoll(boolean epoll) {
         this.epoll = epoll;
+    }
+
+    public int getPayload() {
+        return payload;
+    }
+
+    public void setPayload(int payload) {
+        this.payload = payload;
     }
 }

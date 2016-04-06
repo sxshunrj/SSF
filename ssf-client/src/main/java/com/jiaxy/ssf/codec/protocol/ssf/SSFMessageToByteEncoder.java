@@ -35,7 +35,7 @@ public class SSFMessageToByteEncoder extends MessageToByteEncoder {
                 Protocol protocol = ProtocolFactory.getProtocol(message.getHead().getProtocolType(),
                         message.getHead().getCodecType());
                 protocol.encode(msg,buf);
-                encodeProtocolDecorator(message.getMsgBuf(), out);
+                encodeProtocolDecorator(buf, out);
                 buf.release();
             }
         } else {

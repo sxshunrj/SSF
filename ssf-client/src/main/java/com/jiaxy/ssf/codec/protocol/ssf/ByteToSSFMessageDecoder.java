@@ -34,7 +34,7 @@ public class ByteToSSFMessageDecoder extends LengthFieldBasedFrameDecoder{
          * -4B lengthAdjustment for the length of the Full length field
          * 6B initialBytesToStrip.strip magic + full length field
          */
-        super(maxFrameLength,2,4,-4,6);
+       super(maxFrameLength,2,4,-4,6);
 
     }
 
@@ -42,6 +42,9 @@ public class ByteToSSFMessageDecoder extends LengthFieldBasedFrameDecoder{
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         Object frame = super.decode(ctx, in);
+        if ( frame == null ){
+            return null;
+        }
         return decodeSSFFrame((ByteBuf) frame);
     }
 
