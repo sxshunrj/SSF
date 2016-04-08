@@ -12,6 +12,6 @@ package com.jiaxy.ssf.processor;
  */
 public interface Processor<I,O> {
 
-    O execute(I in);
+    O execute(I in) throws Throwable;
 
 }
