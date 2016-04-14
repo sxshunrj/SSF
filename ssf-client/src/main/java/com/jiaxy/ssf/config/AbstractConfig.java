@@ -1,4 +1,4 @@
-package com.jiaxy.ssf.intercept;
+package com.jiaxy.ssf.config;
 
 /**
  * Title: <br>
@@ -8,8 +8,7 @@ package com.jiaxy.ssf.intercept;
  *
  * @author <a href=mailto:taobaorun@gmail.com>wutao</a>
  *
- * @since 2016/04/07 14:11
+ * @since 2016/04/11 18:39
  */
-public interface MessageInvocation extends Invocation{
-
+public class AbstractConfig {
 }

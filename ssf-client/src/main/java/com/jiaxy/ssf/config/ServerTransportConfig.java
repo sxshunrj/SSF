@@ -1,5 +1,6 @@
 package com.jiaxy.ssf.config;
 
+import com.jiaxy.ssf.common.Constants;
 import com.jiaxy.ssf.common.ProtocolType;
 
 /**
@@ -14,7 +15,7 @@ import com.jiaxy.ssf.common.ProtocolType;
  */
 public class ServerTransportConfig {
 
-    private int port = 31616;
+    private int port = Constants.DEFAULT_SERVER_PORT;
 
     private String host = "localhost";
 

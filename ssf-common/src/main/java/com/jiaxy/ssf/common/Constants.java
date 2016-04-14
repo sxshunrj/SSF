@@ -22,4 +22,11 @@ public class Constants {
     public static final boolean WINDOWS = CommonUtil.isWindows();
 
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
+    public static final String DEFAULT_PROTOCOL = "ssf";
+
+    public static final int DEFAULT_SERVER_PORT = 31616;
+
+    public static final int PAYLOAD = 8 * 1024 * 1024;
+
 }

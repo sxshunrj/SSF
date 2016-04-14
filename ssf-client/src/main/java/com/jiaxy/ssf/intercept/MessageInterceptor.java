@@ -1,5 +1,6 @@
 package com.jiaxy.ssf.intercept;
 
+import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
 
 /**
@@ -15,5 +16,5 @@ import com.jiaxy.ssf.message.ResponseMessage;
 public interface MessageInterceptor extends Interceptor {
 
 
-    ResponseMessage invoke(MessageInvocation invocation) throws Throwable;
+    ResponseMessage invoke(MessageInvocation invocation,RequestMessage message) throws Throwable;
 }

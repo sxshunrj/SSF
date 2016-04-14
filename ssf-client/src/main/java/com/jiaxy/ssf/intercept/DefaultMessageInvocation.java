@@ -2,6 +2,7 @@ package com.jiaxy.ssf.intercept;
 
 import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.message.AbstractMessage;
+import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,11 @@ public class DefaultMessageInvocation implements MessageInvocation {
 
     private int currentInterceptorIndex = -1;
 
-    private List<MessageInterceptor> interceptors = new ArrayList<MessageInterceptor>();
+    private final List<MessageInterceptor> interceptors;
 
+    public DefaultMessageInvocation(List<MessageInterceptor> interceptors) {
+        this.interceptors = interceptors;
+    }
 
     @Override
     public ResponseMessage proceed(AbstractMessage message) throws Throwable{
@@ -37,8 +41,9 @@ public class DefaultMessageInvocation implements MessageInvocation {
         MessageInterceptor messageInterceptor = interceptors.get(++currentInterceptorIndex);
         if ( currentInterceptorIndex == interceptors.size() - 1 ){
             //last interceptor execute service
-            responseMessage = messageInterceptor.invoke(this);
+            responseMessage = messageInterceptor.invoke(this,(RequestMessage)message);
         }
         return responseMessage;
     }
+
 }

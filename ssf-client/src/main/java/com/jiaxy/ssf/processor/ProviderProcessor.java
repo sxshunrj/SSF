@@ -1,6 +1,7 @@
 package com.jiaxy.ssf.processor;
 
 import com.jiaxy.ssf.intercept.MessageInvocation;
+import com.jiaxy.ssf.intercept.MessageInvocationFactory;
 import com.jiaxy.ssf.message.AbstractMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
 import org.slf4j.Logger;
@@ -25,7 +26,9 @@ public class ProviderProcessor implements Processor<AbstractMessage,ResponseMess
 
     private MessageInvocation invocation;
 
-
+    public ProviderProcessor(MessageInvocation invocation) {
+        this.invocation = invocation;
+    }
 
     @Override
     public ResponseMessage execute(AbstractMessage message) throws Throwable{

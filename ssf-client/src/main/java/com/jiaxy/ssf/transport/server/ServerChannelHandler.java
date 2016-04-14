@@ -58,7 +58,11 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         ProcessorManager processorManager = getInstance();
         Processor<RPCTask,Void> processor =  processorManager.getProcessor(processorKey(serverTransportConfig.getHost(),
                 serverTransportConfig.getPort()));
-        processor.execute(getTask(ctx.channel(), (AbstractMessage) msg));
+        try {
+            processor.execute(getTask(ctx.channel(), (AbstractMessage) msg));
+        } catch (Throwable throwable) {
+            throw RpcException.convertToRpcException(throwable);
+        }
     }
 
     @Override

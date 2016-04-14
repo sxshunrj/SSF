@@ -19,4 +19,10 @@ public class MessageBuilder {
         responseMessage.getHead().setMessageType(AbstractMessage.HEARTBEAT_RESPONSE_MSG);
         return responseMessage;
     }
+
+    public static ResponseMessage buildResponseMessage(RequestMessage requestMessage){
+        ResponseMessage responseMessage = new ResponseMessage(false);
+        responseMessage.setHead(requestMessage.getHead().clone());
+        return responseMessage;
+    }
 }
