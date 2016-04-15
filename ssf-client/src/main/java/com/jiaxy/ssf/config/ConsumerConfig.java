@@ -1,5 +1,17 @@
 package com.jiaxy.ssf.config;
 
+import com.jiaxy.ssf.client.Client;
+import com.jiaxy.ssf.client.balance.LoadBalanceStrategy;
+import com.jiaxy.ssf.client.cluster.ClusterStrategy;
+import com.jiaxy.ssf.common.Constants;
+import com.jiaxy.ssf.common.ProtocolType;
+import com.jiaxy.ssf.exception.InitException;
+import com.jiaxy.ssf.processor.ConsumerProcessor;
+import com.jiaxy.ssf.processor.MessageProcessor;
+import com.jiaxy.ssf.proxy.ProxyType;
+import com.jiaxy.ssf.proxy.ServiceProxyFactory;
+import com.jiaxy.ssf.service.GenericService;
+
 /**
  * Title: <br>
  * <p>
@@ -12,11 +24,64 @@ package com.jiaxy.ssf.config;
  */
 public class ConsumerConfig<T> extends SSFConfig{
 
+
+    private ProtocolType protocol;
+
+    /**
+     * direct url
+     */
+    private String url;
+
+    private boolean generic = false;
+
+    private boolean async = false;
+
+    private int connectionTimeout = Constants.DEFAULT_CLIENT_CONNECT_TIMEOUT;
+
+    private ClusterStrategy strategy = ClusterStrategy.FAILOVER;
+
+    private LoadBalanceStrategy lbStrategy = LoadBalanceStrategy.RANDOM;
+
+    private boolean lazy = false;
+
+    private boolean sticky = false;
+
+    private boolean inJVM = true;
+
+    private boolean subscribe = true;
+
+
+
+    /**
+     * default retry 3 times
+     */
+    private int retries = 3;
+
+
+
     private T proxy;
 
+    private MessageProcessor processor;
 
-    public T refer(){
-        return proxy;
+    private Client client;
+
+    public T refer() throws InitException{
+        if ( proxy != null ){
+            return proxy;
+        }
+        synchronized (this){
+            try {
+                processor = new ConsumerProcessor();
+                proxy = (T) ServiceProxyFactory.getProxy(ProxyType.JDK,getProxyClass(),processor);
+                return proxy;
+            }catch (Throwable e){
+                if ( e instanceof InitException){
+                    throw (InitException)e;
+                } else {
+                    throw new InitException("build consumer error",e);
+                }
+            }
+        }
     }
 
 
@@ -27,6 +92,127 @@ public class ConsumerConfig<T> extends SSFConfig{
 
     @Override
     public String buildUniqueKey() {
-        return null;
+        return "consumer://"+serviceInterfaceName+":"+alias;
+    }
+
+    @Override
+    public Class<?> getProxyClass() {
+        if (generic){
+            return GenericService.class;
+        }
+        return getServiceInterfaceClass();
+    }
+
+
+    public ProtocolType getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(ProtocolType protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public boolean isGeneric() {
+        return generic;
+    }
+
+    public void setGeneric(boolean generic) {
+        this.generic = generic;
+    }
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public ClusterStrategy getStrategy() {
+        return strategy;
+    }
+
+    public void setStrategy(ClusterStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public LoadBalanceStrategy getLbStrategy() {
+        return lbStrategy;
+    }
+
+    public void setLbStrategy(LoadBalanceStrategy lbStrategy) {
+        this.lbStrategy = lbStrategy;
+    }
+
+    public boolean isLazy() {
+        return lazy;
+    }
+
+    public void setLazy(boolean lazy) {
+        this.lazy = lazy;
+    }
+
+    public boolean isSticky() {
+        return sticky;
+    }
+
+    public void setSticky(boolean sticky) {
+        this.sticky = sticky;
+    }
+
+    public boolean isInJVM() {
+        return inJVM;
+    }
+
+    public void setInJVM(boolean inJVM) {
+        this.inJVM = inJVM;
+    }
+
+    public boolean isSubscribe() {
+        return subscribe;
+    }
+
+    public void setSubscribe(boolean subscribe) {
+        this.subscribe = subscribe;
+    }
+
+    public int getRetries() {
+        return retries;
+    }
+
+    public void setRetries(int retries) {
+        this.retries = retries;
+    }
+
+    public T getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(T proxy) {
+        this.proxy = proxy;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 }

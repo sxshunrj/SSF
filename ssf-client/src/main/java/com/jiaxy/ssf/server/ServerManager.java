@@ -1,4 +1,4 @@
-package com.jiaxy.ssf.provider;
+package com.jiaxy.ssf.server;
 
 import com.jiaxy.ssf.config.ServerConfig;
 
@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Title: <br>
  * <p>
  * Description: <br>
- *    create {@link com.jiaxy.ssf.provider.Server}
+ *    create {@link com.jiaxy.ssf.server.Server}
  * </p>
  *
  * @author <a href=mailto:taobaorun@gmail.com>wutao</a>

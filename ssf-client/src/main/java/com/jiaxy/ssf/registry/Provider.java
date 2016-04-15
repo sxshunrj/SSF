@@ -1,4 +1,4 @@
-package com.jiaxy.ssf.provider;
+package com.jiaxy.ssf.registry;
 
 /**
  * Title: <br>

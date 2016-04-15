@@ -18,6 +18,5 @@ public interface ProcessorManager<T extends Processor> {
 
     T getProcessor(String key);
 
-    T getProcessor(String key,Class<T> processClz);
 
 }

@@ -1,4 +1,4 @@
-package com.jiaxy.ssf.provider;
+package com.jiaxy.ssf.server;
 
 import com.jiaxy.ssf.config.ProviderConfig;
 import com.jiaxy.ssf.config.ServerConfig;

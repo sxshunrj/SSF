@@ -1,5 +1,7 @@
 package com.jiaxy.ssf.message;
 
+import com.jiaxy.ssf.common.ClassUtil;
+
 /**
  * Title: <br>
  * <p>
@@ -24,5 +26,19 @@ public class MessageBuilder {
         ResponseMessage responseMessage = new ResponseMessage(false);
         responseMessage.setHead(requestMessage.getHead().clone());
         return responseMessage;
+    }
+
+
+    public static RequestMessage buildRequestMessage(Class serviceInterfaceClz,
+                                                     String methodName,
+                                                     Class[] paramTypes,
+                                                     Object[] args){
+        RequestMessage requestMessage = new RequestMessage();
+        RequestMessageBody body = new RequestMessageBody();
+        body.setArgs(args);
+        body.setArgsType(ClassUtil.classArr2StringArr(paramTypes));
+        body.setClassName(serviceInterfaceClz.getName());
+        body.setMethodName(methodName);
+        return requestMessage;
     }
 }

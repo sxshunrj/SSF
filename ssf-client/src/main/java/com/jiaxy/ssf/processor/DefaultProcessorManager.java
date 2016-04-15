@@ -31,8 +31,4 @@ public class DefaultProcessorManager implements ProcessorManager {
         return processors.get(key);
     }
 
-    @Override
-    public Processor getProcessor(String key, Class processClz) {
-        return null;
-    }
 }

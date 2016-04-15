@@ -189,6 +189,56 @@ public class ClassUtil {
 		}
 	}
 
+	public static String[] classArr2StringArr(Class[] classes){
+		if ( classes == null && classes.length == 0 ){
+			return new String[0];
+		} else {
+			String[] strArr = new String[classes.length];
+			for (int i = 0 ;i < classes.length;i++){
+				strArr[i] = classString(classes[i]);
+			}
+			return strArr;
+		}
+	}
+
+	public static String classString(Class clz){
+		if ( clz.isArray() ){
+			return arrayClass2SuffixStyle(clz.getName());
+		} else {
+			return clz.getName();
+		}
+	}
+
+	public static String arrayClass2SuffixStyle(String clzName){
+		String arraySuffix = "";
+		int i = 0;
+		for (;i< clzName.length();i++){
+			if (clzName.charAt(i) != '['){
+				break;
+			}
+			arraySuffix+=ARRAY_SUFFIX;
+		}
+		String type = clzName.substring(i,clzName.length());
+		if ("Z".equals(type)){
+			return "boolean"+arraySuffix;
+		} else if ("B".equals(type)){
+			return "byte"+arraySuffix;
+		} else if ("C".equals(type)){
+			return "char"+arraySuffix;
+		} else if ("D".equals(type)){
+			return "double"+arraySuffix;
+		} else if ("F".equals(type)){
+			return "float"+arraySuffix;
+		} else if ("I".equals(type)){
+			return "int"+arraySuffix;
+		} else if ("S".equals(type)){
+			return "short"+arraySuffix;
+		} else {
+			//"[[Ljava.lang.String;" style arrays
+			return type.substring(1,type.length()-1)+arraySuffix;
+		}
+	}
+
 
 	/**
 	 * Register the given common classes with the ClassUtils cache.

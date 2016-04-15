@@ -2,17 +2,14 @@ package com.jiaxy.ssf.config;
 
 import com.jiaxy.ssf.common.Assert;
 import com.jiaxy.ssf.exception.IllegalConfigureException;
-import com.jiaxy.ssf.exception.InitException;
 import com.jiaxy.ssf.intercept.MessageInvocation;
 import com.jiaxy.ssf.intercept.MessageInvocationFactory;
 import com.jiaxy.ssf.processor.ProcessorManagerFactory;
 import com.jiaxy.ssf.processor.ProviderProcessor;
-import com.jiaxy.ssf.provider.ProviderManager;
+import com.jiaxy.ssf.server.ProviderManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.jiaxy.ssf.common.ClassUtil.forName;
-import static com.jiaxy.ssf.common.ClassUtil.getDefaultClassLoader;
 
 /**
  * Title: <br>
@@ -31,6 +28,9 @@ public class ProviderConfig<T> extends SSFConfig {
 
     private T ref;
 
+
+
+
     public T getRef() {
         return ref;
     }
@@ -39,6 +39,11 @@ public class ProviderConfig<T> extends SSFConfig {
         this.ref = ref;
     }
 
+
+    @Override
+    public Class<?> getProxyClass() {
+        return getServiceInterfaceClass();
+    }
 
     public void doExport() {
         ProviderConfig exported = ProviderManager.getExportedProvider(this);
@@ -51,7 +56,7 @@ public class ProviderConfig<T> extends SSFConfig {
                 Assert.notNull(alias,"alias is empty");
                 Assert.notNull(serviceInterfaceName,"serviceInterfaceName is empty");
                 Assert.notNull(ref,String.format("the implement of the %s instance is null",serviceInterfaceName));
-                Class serviceClz = getServiceInterfaceClass();
+                Class serviceClz = getProxyClass();
                 if (!serviceClz.isInstance(ref)){
                     throw new IllegalConfigureException(String.format("%s is not instance of interface %s.please check ref",
                             ref.getClass().getName(),
@@ -80,16 +85,9 @@ public class ProviderConfig<T> extends SSFConfig {
 
     @Override
     public String buildUniqueKey() {
-        return serviceInterfaceName+":"+alias;
+        return "provider://"+serviceInterfaceName+":"+alias;
     }
 
 
-    private Class getServiceInterfaceClass(){
-        try {
-            return forName(serviceInterfaceName, getDefaultClassLoader(), true);
-        } catch (ClassNotFoundException e) {
-            throw new InitException(String.format("load service interface [%s] class error",
-                    serviceInterfaceName),e);
-        }
-    }
+
 }
