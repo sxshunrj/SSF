@@ -29,4 +29,10 @@ public class Constants {
 
     public static final int PAYLOAD = 8 * 1024 * 1024;
 
+
+    /**
+     * internal use
+     */
+    public static final String HIDE_KEY_PREFIX = ".";
+
 }

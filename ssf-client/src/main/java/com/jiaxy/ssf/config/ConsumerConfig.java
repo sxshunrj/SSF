@@ -24,6 +24,14 @@ import com.jiaxy.ssf.service.GenericService;
  */
 public class ConsumerConfig<T> extends SSFConfig{
 
+    public static final String ASYNC = "async";
+
+    public static final String TIMEOUT = "timeout";
+
+    /**
+     * 5s
+     */
+    public static final int TIMEOUT_VALUE = 5000;
 
     private ProtocolType protocol;
 
@@ -104,6 +112,14 @@ public class ConsumerConfig<T> extends SSFConfig{
     }
 
 
+    public boolean isMethodAsync(String method){
+        return (Boolean)getMethodConfigValue(method,ASYNC,isAsync());
+    }
+
+    public int methodTimeout(String method){
+        return (Integer)getMethodConfigValue(method,TIMEOUT,TIMEOUT_VALUE);
+    }
+
     public ProtocolType getProtocol() {
         return protocol;
     }
@@ -152,11 +168,11 @@ public class ConsumerConfig<T> extends SSFConfig{
         this.strategy = strategy;
     }
 
-    public LoadBalanceStrategy getLbStrategy() {
+    public LoadBalanceStrategy getLBStrategy() {
         return lbStrategy;
     }
 
-    public void setLbStrategy(LoadBalanceStrategy lbStrategy) {
+    public void setLBStrategy(LoadBalanceStrategy lbStrategy) {
         this.lbStrategy = lbStrategy;
     }
 

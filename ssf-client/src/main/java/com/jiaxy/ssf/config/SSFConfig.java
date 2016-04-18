@@ -1,10 +1,13 @@
 package com.jiaxy.ssf.config;
 
+import com.jiaxy.ssf.common.Constants;
 import com.jiaxy.ssf.exception.InitException;
 import com.jiaxy.ssf.intercept.MessageInterceptor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static com.jiaxy.ssf.common.ClassUtil.forName;
 import static com.jiaxy.ssf.common.ClassUtil.getDefaultClassLoader;
 
@@ -43,7 +46,21 @@ public abstract class SSFConfig extends AbstractConfig {
 
     protected Compress compress;
 
+    protected transient volatile ConcurrentHashMap<String,Object> confCache = new ConcurrentHashMap<String, Object>();
+
+
     public abstract Class<?> getProxyClass();
+
+
+    public Object getMethodConfigValue(String method,String cfKey,Object defaultValue){
+        Object value = confCache.get(methodInternalConfKey(method,cfKey));
+        return value == null ? defaultValue : value;
+    }
+
+
+    public String methodInternalConfKey(String method,String confKey){
+        return Constants.HIDE_KEY_PREFIX+method+confKey;
+    }
 
     protected Class getServiceInterfaceClass(){
         try {
