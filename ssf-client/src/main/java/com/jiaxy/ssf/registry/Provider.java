@@ -17,6 +17,8 @@ public class Provider {
 
     private int port;
 
+    private int weight;
+
 
     public String getIp() {
         return ip;
@@ -32,5 +34,13 @@ public class Provider {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 }
