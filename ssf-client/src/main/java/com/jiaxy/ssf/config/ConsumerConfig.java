@@ -28,6 +28,9 @@ public class ConsumerConfig<T> extends SSFConfig{
 
     public static final String TIMEOUT = "timeout";
 
+    //the number of retries
+    public static final String RETRIES = "retries";
+
     /**
      * 5s
      */
@@ -111,6 +114,15 @@ public class ConsumerConfig<T> extends SSFConfig{
         return getServiceInterfaceClass();
     }
 
+
+    /**
+     *
+     * @param method
+     * @return the number of retries
+     */
+    public int getRetriesNumber(String method){
+        return (Integer)getMethodConfigValue(method,RETRIES,getRetries());
+    }
 
     public boolean isMethodAsync(String method){
         return (Boolean)getMethodConfigValue(method,ASYNC,isAsync());

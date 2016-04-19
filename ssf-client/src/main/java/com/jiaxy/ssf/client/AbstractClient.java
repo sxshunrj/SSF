@@ -48,6 +48,11 @@ public abstract class AbstractClient implements Client {
         }
     }
 
+    @Override
+    public void close() {
+
+    }
+
     protected abstract ResponseMessage doSendMsg(RequestMessage requestMessage);
 
 
@@ -80,7 +85,9 @@ public abstract class AbstractClient implements Client {
     protected Connection selectConnection(RequestMessage requestMessage,List<Provider> invokedProviders){
         //TODO sticky
         List<Provider> aliveProviders = connectionManager.getAliveProviders();
-        aliveProviders.removeAll(invokedProviders);
+        if (invokedProviders != null){
+            aliveProviders.removeAll(invokedProviders);
+        }
         if ( aliveProviders.size() == 0 ){
             throw new NoAliveProviderException(String.format(
                     "%s no alive provider.current providers is:",
@@ -134,5 +141,4 @@ public abstract class AbstractClient implements Client {
                 return new RandomLoadBalance();
         }
     }
-
 }
