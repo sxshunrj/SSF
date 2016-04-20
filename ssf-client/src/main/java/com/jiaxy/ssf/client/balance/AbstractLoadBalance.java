@@ -4,8 +4,6 @@ import com.jiaxy.ssf.client.LoadBalance;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.registry.Provider;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -35,14 +33,46 @@ public abstract class AbstractLoadBalance implements LoadBalance {
     public abstract Provider doSelect(RequestMessage req,List<Provider> providers);
 
 
-    protected void sortProviderListByWeight(List<Provider> providers){
-        if (providers != null && !providers.isEmpty()){
-            Collections.sort(providers, new Comparator<Provider>() {
-                @Override
-                public int compare(Provider o1, Provider o2) {
-                    return o1.getWeight() > o2.getWeight() ? 1 : -1;
+    protected ProvidersWeight getProviders(List<Provider> providers){
+        ProvidersWeight providersInfo = new ProvidersWeight();
+        for ( int i = 0 ;i < providers.size();i = i + 2){
+            Provider provider = providers.get(i);
+            providersInfo.setWeightTotal(providersInfo.getWeightTotal()+provider.getWeight());
+            if (i + 1 < providers.size()){
+                Provider nextProvider = providers.get(i+1);
+                providersInfo.setWeightTotal(providersInfo.getWeightTotal() + nextProvider.getWeight());
+                if (providersInfo.isIdenticalWeight() && provider.getWeight() != nextProvider.getWeight()){
+                    providersInfo.setIdenticalWeight(false);
                 }
-            });
+            }
+        }
+        return providersInfo;
+    }
+
+
+    protected class ProvidersWeight {
+
+        private boolean identicalWeight = true;
+
+        private int weightTotal;
+
+        public ProvidersWeight() {
+        }
+
+        public boolean isIdenticalWeight() {
+            return identicalWeight;
+        }
+
+        public void setIdenticalWeight(boolean identicalWeight) {
+            this.identicalWeight = identicalWeight;
+        }
+
+        public int getWeightTotal() {
+            return weightTotal;
+        }
+
+        public void setWeightTotal(int weightTotal) {
+            this.weightTotal = weightTotal;
         }
     }
 }

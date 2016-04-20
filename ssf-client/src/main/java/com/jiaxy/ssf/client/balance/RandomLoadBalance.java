@@ -22,20 +22,14 @@ public class RandomLoadBalance extends AbstractLoadBalance {
 
     @Override
     public Provider doSelect(RequestMessage req, List<Provider> providers) {
-        sortProviderListByWeight(providers);
-        boolean theSameWeight = false;
-        int maxWeight = providers.get(0).getWeight();
-        int minWeight = providers.get(providers.size()-1).getWeight();
-        if (maxWeight == minWeight){
-            theSameWeight = true;
-        }
+        ProvidersWeight providersInfo = getProviders(providers);
         Provider selected = null;
-        if (!theSameWeight){
-            int randomWeight = random.nextInt(maxWeight);
-            //TODO no loop
-            for (int i = 0 ;i<providers.size();i++){
+        if (!providersInfo.isIdenticalWeight()){
+            int randomWeight = random.nextInt(providersInfo.getWeightTotal());
+            for (int i = providers.size() - 1 ;i >= 0;i--){
                 Provider provider = providers.get(i);
-                if (provider.getWeight() - randomWeight >= 0){
+                randomWeight -= provider.getWeight();
+                if (randomWeight < 0){
                     selected = providers.get(i);
                     break;
                 }
