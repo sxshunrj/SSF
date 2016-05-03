@@ -25,7 +25,7 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance{
         int size = providers.size();
         int selected;
         do {
-            selected = (increment() + 1) % size;
+            selected = increment() % size;
             Provider provider = providers.get(selected);
             if ( provider.getWeight() > 0 ){
                 return provider;
