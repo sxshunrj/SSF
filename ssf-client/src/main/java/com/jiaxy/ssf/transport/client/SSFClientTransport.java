@@ -21,6 +21,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 
@@ -110,6 +111,8 @@ public class SSFClientTransport extends AbstractTcpClientTransport {
             channelFuture.awaitUninterruptibly(clientTransportConfig.getConnectionTimeout(), TimeUnit.MILLISECONDS);
             if ( channelFuture.isSuccess() ){
                 channel = channelFuture.channel();
+                setLocalAddress((InetSocketAddress) channel.localAddress());
+                setRemoteAddress((InetSocketAddress) channel.remoteAddress());
                 //TODO remote address maybe the same with local address
             } else {
                 throw new InitException("Failed to connect :"+remoteIP+":"+remotePort,channelFuture.cause());

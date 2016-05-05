@@ -61,6 +61,9 @@ public class ConsumerConfig<T> extends SSFConfig{
 
     private boolean subscribe = true;
 
+    private boolean epoll = false;
+
+    private int payload = 8 * 1024 * 1024;
 
 
     /**
@@ -242,5 +245,21 @@ public class ConsumerConfig<T> extends SSFConfig{
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public boolean isEpoll() {
+        return epoll;
+    }
+
+    public void setEpoll(boolean epoll) {
+        this.epoll = epoll;
+    }
+
+    public int getPayload() {
+        return payload;
+    }
+
+    public void setPayload(int payload) {
+        this.payload = payload;
     }
 }

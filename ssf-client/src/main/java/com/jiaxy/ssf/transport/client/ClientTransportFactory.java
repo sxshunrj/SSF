@@ -72,6 +72,10 @@ public class ClientTransportFactory {
         }
     }
 
+    public static ClientTransportKey buildKey(ProtocolType protocolType, String ip, int port){
+        return new ClientTransportKey(protocolType,ip,port);
+    }
+
     private static ClientTransport createClientTransport(ClientTransportKey key,ClientTransportConfig clientTransportConfig){
         ClientTransport clientTransport = null;
         switch ( key.protocolType ){

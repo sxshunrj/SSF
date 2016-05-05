@@ -2,6 +2,9 @@ package com.jiaxy.ssf.connection;
 
 import com.jiaxy.ssf.registry.Provider;
 import com.jiaxy.ssf.transport.client.ClientTransport;
+import com.jiaxy.ssf.util.NetUtil;
+
+import java.util.Observable;
 
 /**
  * Title: <br>
@@ -13,11 +16,13 @@ import com.jiaxy.ssf.transport.client.ClientTransport;
  *
  * @since 2016/04/18 09:51
  */
-public class Connection {
+public class Connection extends Observable {
 
     private Provider provider;
 
     private ClientTransport transport;
+
+    private ConnectionState state;
 
 
     public Connection(Provider provider) {
@@ -45,5 +50,26 @@ public class Connection {
 
     public void setTransport(ClientTransport transport) {
         this.transport = transport;
+    }
+
+    public ConnectionState getState() {
+        return state;
+    }
+
+    public void setState(ConnectionState state) {
+        this.state = state;
+    }
+
+    public void changeState(ConnectionState state){
+        setChanged();
+        notifyObservers(this.state);
+        this.state = state;
+    }
+
+    @Override
+    public String toString() {
+        return transport != null ?
+                NetUtil.channelToString(transport.getLocalAddress(),transport.getRemoteAddress()) :
+                provider.toString();
     }
 }

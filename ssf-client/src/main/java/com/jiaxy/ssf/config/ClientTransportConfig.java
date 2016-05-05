@@ -22,6 +22,15 @@ public class ClientTransportConfig {
     private int payload = 8 * 1024 * 1024;
 
 
+    public static ClientTransportConfig build(ConsumerConfig consumerConfig){
+        ClientTransportConfig config = new ClientTransportConfig();
+        config.setConnectionTimeout(consumerConfig.getConnectionTimeout());
+        config.setEpoll(consumerConfig.isEpoll());
+        config.setPayload(consumerConfig.getPayload());
+        return config;
+    }
+
+
     public int getConnectionTimeout() {
         return connectionTimeout;
     }

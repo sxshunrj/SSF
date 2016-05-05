@@ -22,7 +22,14 @@ public class ServerTest {
         serverConfig.setEpoll(false);
         serverConfig.bindProvider(providerConfig);
         serverConfig.start();
-        TimeUnit.SECONDS.sleep(100);
+        synchronized (this){
+            while (true){
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
     }
 
     @Test
