@@ -61,9 +61,10 @@ public class Connection extends Observable {
     }
 
     public void changeState(ConnectionState state){
-        setChanged();
-        notifyObservers(this.state);
+        ConnectionState oldState = this.state;
         this.state = state;
+        setChanged();
+        notifyObservers(oldState);
     }
 
     @Override

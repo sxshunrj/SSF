@@ -43,6 +43,15 @@ public class FailoverClientTest {
         if (rs.isError()){
             rs.getException().printStackTrace();
         }
+        while (true){
+            TimeUnit.SECONDS.sleep(1);
+            try {
+                rs = client.sendMsg(requestMessage);
+                System.out.println(rs.getResponse());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Test

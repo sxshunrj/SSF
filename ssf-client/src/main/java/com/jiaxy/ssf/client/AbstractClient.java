@@ -87,6 +87,7 @@ public abstract class AbstractClient implements Client {
                 responseMessage = connection.getTransport().sendSync(requestMessage, timeout);
             }
         } catch (ConnectionClosedException e) {
+            connection.changeState(RETRY);
             //TODO handle
         }
         return responseMessage;

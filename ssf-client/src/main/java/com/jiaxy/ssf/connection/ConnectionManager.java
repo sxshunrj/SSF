@@ -43,6 +43,7 @@ public class ConnectionManager implements Observer {
     @Override
     public void update(Observable observable, Object oldState) {
         Lock writeLock = lock.writeLock();
+        writeLock.lock();
         try {
             ConnectionState oldConnState = (ConnectionState) oldState;
             Connection connection = (Connection) observable;
@@ -66,6 +67,7 @@ public class ConnectionManager implements Observer {
 
 
     public void addConnection(Connection connection){
+        connection.addObserver(this);
         switch (connection.getState()){
             case ALIVE:
                 addAliveConnection(connection.getProvider(),connection);
@@ -80,7 +82,16 @@ public class ConnectionManager implements Observer {
     }
 
     public Connection getAliveConnection(Provider provider){
-        return aliveConnections.get(provider);
+        Connection connection = aliveConnections.get(provider);
+        if (connection != null){
+            if (connection.isConnected()){
+                return connection;
+            } else {
+                connection.changeState(ConnectionState.RETRY);
+                return null;
+            }
+        }
+        return connection;
     }
 
 
