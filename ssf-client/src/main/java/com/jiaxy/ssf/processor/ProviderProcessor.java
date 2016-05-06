@@ -11,7 +11,7 @@ import com.jiaxy.ssf.message.ResponseMessage;
  *
  *     execute provider service logic<br>
  *
- *     execute filter by the interceptors
+ *     execute filtered by the interceptors
  *
  * </p>
  *

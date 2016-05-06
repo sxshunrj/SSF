@@ -3,9 +3,12 @@ package com.jiaxy.ssf.config;
 import com.jiaxy.ssf.client.Client;
 import com.jiaxy.ssf.client.balance.LoadBalanceStrategy;
 import com.jiaxy.ssf.client.cluster.ClusterStrategy;
+import com.jiaxy.ssf.client.cluster.FailfastClient;
+import com.jiaxy.ssf.client.cluster.FailoverClient;
 import com.jiaxy.ssf.common.Constants;
 import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.exception.InitException;
+import com.jiaxy.ssf.intercept.MessageInvocationFactory;
 import com.jiaxy.ssf.processor.ConsumerProcessor;
 import com.jiaxy.ssf.processor.MessageProcessor;
 import com.jiaxy.ssf.proxy.ProxyType;
@@ -67,9 +70,9 @@ public class ConsumerConfig<T> extends SSFConfig{
 
 
     /**
-     * default retry 3 times
+     * default retry 0 times
      */
-    private int retries = 3;
+    private int retries = 0;
 
 
 
@@ -85,7 +88,8 @@ public class ConsumerConfig<T> extends SSFConfig{
         }
         synchronized (this){
             try {
-                processor = new ConsumerProcessor();
+                buildClient();
+                processor = new ConsumerProcessor(MessageInvocationFactory.getMessageInvocation(this),this);
                 proxy = (T) ServiceProxyFactory.getProxy(ProxyType.JDK,getProxyClass(),processor);
                 return proxy;
             }catch (Throwable e){
@@ -100,8 +104,11 @@ public class ConsumerConfig<T> extends SSFConfig{
 
 
     public void unRefer(){
-
+        if (client != null){
+            client.close();
+        }
     }
+
 
 
     @Override
@@ -117,6 +124,20 @@ public class ConsumerConfig<T> extends SSFConfig{
         return getServiceInterfaceClass();
     }
 
+
+    private void buildClient(){
+        switch (this.getStrategy()){
+            case FAILOVER:
+                client = new FailoverClient(this);
+                break;
+            case FAILFAST:
+                client = new FailfastClient(this);
+                break;
+            default:
+                client = new FailoverClient(this);
+                break;
+        }
+    }
 
     /**
      *

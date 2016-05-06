@@ -6,7 +6,6 @@ import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.config.ConsumerConfig;
 import com.jiaxy.ssf.connection.Connection;
 import com.jiaxy.ssf.connection.ConnectionManager;
-import com.jiaxy.ssf.connection.ConnectionState;
 import com.jiaxy.ssf.exception.ConnectionClosedException;
 import com.jiaxy.ssf.exception.NoAliveProviderException;
 import com.jiaxy.ssf.message.RequestMessage;
@@ -26,9 +25,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import static com.jiaxy.ssf.connection.ConnectionState.*;
 import static com.jiaxy.ssf.transport.client.ClientTransportFactory.buildKey;
 import static com.jiaxy.ssf.transport.client.ClientTransportFactory.getClientTransport;
-import static com.jiaxy.ssf.connection.ConnectionState.*;
 
 /**
  * Title: <br>
@@ -71,6 +70,7 @@ public abstract class AbstractClient implements Client {
 
     }
 
+
     protected abstract ResponseMessage doSendMsg(RequestMessage requestMessage);
 
 
@@ -88,7 +88,6 @@ public abstract class AbstractClient implements Client {
             }
         } catch (ConnectionClosedException e) {
             connection.changeState(RETRY);
-            //TODO handle
         }
         return responseMessage;
     }
@@ -193,7 +192,7 @@ public abstract class AbstractClient implements Client {
                             connection.setState(RETRY);
                         }
                     } catch (Exception e){
-                        printFailure(interfaceName,provider,e);
+                        printFailure(interfaceName, provider, e);
                         connection.setState(DEAD);
                     } finally {
                         downLatch.countDown();

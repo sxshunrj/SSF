@@ -84,7 +84,7 @@ public class SSFTask extends RPCTask {
             ProcessorManager processorManager = getInstance();
             Processor<RequestMessage,ResponseMessage> processor = processorManager.getProcessor(processorKey(serviceName, alias));
             if ( processor == null ){
-                throw new RpcException(String.format("can't found a processor for %s:%s.maybe the service has not been loaded or no this service export in channel:%s",
+                throw new RpcException(String.format("can't found a processor for %s:%s ,alias:%s.maybe the service has not been loaded or no this service export in channel",
                         NetUtil.channelToString(channel),
                         serviceName,alias));
             }

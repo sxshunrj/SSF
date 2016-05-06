@@ -39,6 +39,7 @@ public class MessageInvocationFactory {
 
     private static List<MessageInterceptor> buildConsumerInterceptors(ConsumerConfig consumerConfig) {
         List<MessageInterceptor> interceptors = new ArrayList<MessageInterceptor>();
+        interceptors.add(new ConsumerMessageInterceptor(consumerConfig));
         return interceptors;
     }
 }
