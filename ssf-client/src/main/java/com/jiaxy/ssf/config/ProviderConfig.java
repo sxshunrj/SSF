@@ -65,7 +65,8 @@ public class ProviderConfig<T> extends SSFConfig {
                 MessageInvocation invocation = MessageInvocationFactory.getMessageInvocation(this);
                 ProviderProcessor providerProcessor = new ProviderProcessor(invocation);
                 //register processor for this interface service
-                ProcessorManagerFactory.getInstance().register(serviceInterfaceName,providerProcessor);
+                //TODO bug fix
+                ProcessorManagerFactory.getInstance().register(ProcessorManagerFactory.processorKey(serviceInterfaceName,alias),providerProcessor);
                 ProviderManager.addExportedProvider(this);
                 logger.info("export provider [{}] successfully.",uniqueKey);
             }

@@ -14,7 +14,7 @@ public abstract class AbstractDreamTask implements DreamTask {
 
     @Override
     public String dream() {
-        return null;
+        return "";
     }
 
     @Override

@@ -48,8 +48,8 @@ public class FailoverClient extends AbstractClient {
         do {
             Connection connection = super.selectConnection(requestMessage, invokedProviders);
             try {
-                responseMessage = super.sendMsg0(requestMessage,connection);
                 invokedProviders.add(connection.getProvider());
+                responseMessage = super.sendMsg0(requestMessage,connection);
                 if (responseMessage != null){
                     if (lastError != null){
                         logger.warn("invoked successfully retried {} time,last error:",retried,lastError.getMessage());
@@ -75,7 +75,7 @@ public class FailoverClient extends AbstractClient {
                             ),e);
             }
             retried++;
-        } while (retried <= retries);
+        } while (retried < retries);
         if (retries == 0){
             throw new RpcException(String.format("%s/%s/%s:invoked failed,remote:%s,Cause by %s.message is:%s",
                             reqBody.getClassName(),

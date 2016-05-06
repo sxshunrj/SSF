@@ -46,4 +46,9 @@ public class DefaultMessageInvocation implements MessageInvocation {
         return responseMessage;
     }
 
+    @Override
+    public MessageInvocation clone() {
+        MessageInvocation messageInvocation = new DefaultMessageInvocation(interceptors);
+        return messageInvocation;
+    }
 }

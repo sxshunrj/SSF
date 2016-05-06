@@ -12,4 +12,7 @@ package com.jiaxy.ssf.intercept;
  */
 public interface MessageInvocation extends Invocation{
 
+
+    MessageInvocation clone();
+
 }

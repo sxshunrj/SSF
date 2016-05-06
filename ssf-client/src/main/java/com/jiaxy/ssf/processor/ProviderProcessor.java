@@ -32,6 +32,6 @@ public class ProviderProcessor implements Processor<AbstractMessage,ResponseMess
 
     @Override
     public ResponseMessage execute(AbstractMessage message) throws Throwable{
-        return invocation.proceed(message);
+        return invocation.clone().proceed(message);
     }
 }

@@ -31,6 +31,7 @@ public class TaskProcessor implements Processor<RPCTask,Void>{
     public TaskProcessor(ServerTransportConfig serverTransportConfig) {
         this.serverTransportConfig = serverTransportConfig;
         if ( serverTransportConfig != null ){
+            DreamworkFactory.initDreamwork(serverTransportConfig);
             dreamwork = DreamworkFactory.getDreamwork(this.serverTransportConfig.getPort());
         }
     }

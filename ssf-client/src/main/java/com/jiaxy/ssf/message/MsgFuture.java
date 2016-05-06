@@ -1,5 +1,7 @@
 package com.jiaxy.ssf.message;
 
+import com.jiaxy.ssf.codec.protocol.Protocol;
+import com.jiaxy.ssf.codec.protocol.ProtocolFactory;
 import com.jiaxy.ssf.exception.ClientTimeoutException;
 import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.util.NetUtil;
@@ -251,12 +253,24 @@ public class MsgFuture<V> implements Future<V>{
         }
         if ( result instanceof ResponseMessage ){
             ResponseMessage resMsg = (ResponseMessage) result;
-            //TODO decode
+            if (resMsg.getMsgBodyBuf() != null){
 
+                try {
+                    Protocol protocol = ProtocolFactory.getProtocol(resMsg.getProtocolType(),
+                            resMsg.getCodecType());
+                    ResponseMessage realRes = protocol.decode(resMsg.getMsgBodyBuf(), ResponseMessage.class);
+                    if (realRes.getResponse() != null){
+                        resMsg.setResponse(realRes.getResponse());
+                    } else if (realRes.getException() != null){
+                        resMsg.setException(realRes.getException());
+                    }
+                } finally {
+                    resMsg.getMsgBodyBuf().release();
+                    resMsg.setMsgBodyBuf(null);
+                }
+            }
         }
         return result;
 
     }
-
-
 }

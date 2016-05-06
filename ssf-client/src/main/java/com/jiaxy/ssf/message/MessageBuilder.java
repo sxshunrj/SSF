@@ -39,6 +39,7 @@ public class MessageBuilder {
         body.setArgsType(ClassUtil.classArr2StringArr(paramTypes));
         body.setClassName(serviceInterfaceClz.getName());
         body.setMethodName(methodName);
+        requestMessage.setRequestMessageBody(body);
         return requestMessage;
     }
 }

@@ -92,6 +92,7 @@ public class ConnectionManager implements Observer {
     public List<Provider> getAllProviders(){
         List<Provider> all = new ArrayList<Provider>();
         Lock readLock = lock.readLock();
+        readLock.lock();
         try {
             all.addAll(aliveConnections.keySet());
             all.addAll(retryConnections.keySet());

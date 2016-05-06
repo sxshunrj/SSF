@@ -8,6 +8,7 @@ import com.jiaxy.ssf.message.MessageHead;
 import com.jiaxy.ssf.message.ResponseMessage;
 import com.jiaxy.ssf.processor.Processor;
 import com.jiaxy.ssf.processor.ProcessorManager;
+import com.jiaxy.ssf.processor.TaskProcessor;
 import com.jiaxy.ssf.task.RPCTask;
 import com.jiaxy.ssf.task.SSFTask;
 import com.jiaxy.ssf.util.NetUtil;
@@ -40,6 +41,9 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     public ServerChannelHandler(ServerTransportConfig serverTransportConfig) {
         this.serverTransportConfig = serverTransportConfig;
+        ProcessorManager processorManager = getInstance();
+        processorManager.register(processorKey(serverTransportConfig.getHost(),serverTransportConfig.getPort()),new TaskProcessor(serverTransportConfig));
+
     }
 
     @Override

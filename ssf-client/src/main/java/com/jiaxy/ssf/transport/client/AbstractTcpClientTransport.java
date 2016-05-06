@@ -92,12 +92,14 @@ public abstract class AbstractTcpClientTransport extends AbstractClientTransport
         MsgFuture future = msgFutureMap.get(msgId);
         if ( future == null ){
             logger.warn("MsgId[{}] MsgFuture no exist when handle the response message.Maybe has been removed for timeout",msgId);
+            //the future is null,but important ,release msg body buf
+            if (responseMessage != null && responseMessage.getMsgBodyBuf() != null){
+                responseMessage.getMsgBodyBuf().release();
+            }
             return;
         }
         future.setSuccess(responseMessage);
         msgFutureMap.remove(msgId);
-
-
     }
 
     abstract MsgFuture doSendAsync(RequestMessage msg,int timeout);

@@ -108,7 +108,7 @@ public abstract class AbstractClient implements Client {
         }
         if ( aliveProviders.size() == 0 ){
             throw new NoAliveProviderException(String.format(
-                    "%s no alive provider.current providers is:",
+                    "%s no alive provider.current providers is:%s",
                     consumerConfig.buildUniqueKey(),
                     connectionManager.getAllProviders()));
         }

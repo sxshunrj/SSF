@@ -31,6 +31,8 @@ public class JavaEncoder implements Encoder {
             oos = new ObjectOutputStream(bos);
             if ( obj instanceof RequestMessage ){
                 encodeRequestMessage((RequestMessage) obj,oos);
+            } else {
+                writeObject(obj,oos);
             }
             return bos.toByteArray();
 
