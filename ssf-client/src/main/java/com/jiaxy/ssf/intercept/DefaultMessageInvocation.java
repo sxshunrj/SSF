@@ -42,13 +42,15 @@ public class DefaultMessageInvocation implements MessageInvocation {
         if ( currentInterceptorIndex == interceptors.size() - 1 ){
             //last interceptor execute service
             responseMessage = messageInterceptor.invoke(this,(RequestMessage)message);
+            return responseMessage;
+        } else {
+            responseMessage = messageInterceptor.invoke(this,(RequestMessage)message);
         }
         return responseMessage;
     }
 
     @Override
-    public MessageInvocation clone() {
-        MessageInvocation messageInvocation = new DefaultMessageInvocation(interceptors);
-        return messageInvocation;
+    public List<MessageInterceptor> interceptors() {
+        return interceptors;
     }
 }

@@ -24,6 +24,11 @@ public class MessageInvocationFactory {
         return defaultMessageInvocation;
     }
 
+    public static MessageInvocation getMessageInvocation(List<MessageInterceptor> interceptors){
+        MessageInvocation defaultMessageInvocation = new DefaultMessageInvocation(interceptors);
+        return defaultMessageInvocation;
+    }
+
     public static MessageInvocation getMessageInvocation(ConsumerConfig consumerConfig){
         MessageInvocation defaultMessageInvocation = new DefaultMessageInvocation(buildConsumerInterceptors(consumerConfig));
         return defaultMessageInvocation;
@@ -39,6 +44,7 @@ public class MessageInvocationFactory {
 
     private static List<MessageInterceptor> buildConsumerInterceptors(ConsumerConfig consumerConfig) {
         List<MessageInterceptor> interceptors = new ArrayList<MessageInterceptor>();
+        interceptors.add(new ExceptionInterceptor());
         interceptors.add(new ConsumerMessageInterceptor(consumerConfig));
         return interceptors;
     }

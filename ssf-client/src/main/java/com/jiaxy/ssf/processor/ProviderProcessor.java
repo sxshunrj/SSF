@@ -2,6 +2,7 @@ package com.jiaxy.ssf.processor;
 
 import com.jiaxy.ssf.intercept.MessageInvocation;
 import com.jiaxy.ssf.message.AbstractMessage;
+import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
 
 /**
@@ -19,17 +20,15 @@ import com.jiaxy.ssf.message.ResponseMessage;
  *
  * @since 2016/04/07 10:54
  */
-public class ProviderProcessor implements Processor<AbstractMessage,ResponseMessage> {
-
-    private MessageInvocation invocation;
+public class ProviderProcessor extends MessageInvocationProcessor {
 
     public ProviderProcessor(MessageInvocation invocation) {
-        this.invocation = invocation;
+        super(invocation);
     }
 
     @Override
-    public ResponseMessage execute(AbstractMessage message) throws Throwable{
+    public ResponseMessage execute(RequestMessage message) throws Throwable{
         //clone the message invocation
-        return invocation.clone().proceed(message);
+        return invocationClone().proceed(message);
     }
 }

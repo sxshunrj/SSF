@@ -15,21 +15,18 @@ import com.jiaxy.ssf.message.ResponseMessage;
  *
  * @since 2016/04/15 18:35
  */
-public class ConsumerProcessor implements MessageProcessor {
-
-
-    private MessageInvocation invocation;
+public class ConsumerProcessor extends MessageInvocationProcessor {
 
     private ConsumerConfig consumerConfig;
 
     public ConsumerProcessor(MessageInvocation invocation, ConsumerConfig consumerConfig) {
-        this.invocation = invocation;
+        super(invocation);
         this.consumerConfig = consumerConfig;
     }
 
     @Override
     public ResponseMessage execute(RequestMessage in) throws Throwable {
         in.getRequestMessageBody().setAlias(consumerConfig.getAlias());
-        return invocation.clone().proceed(in);
+        return invocationClone().proceed(in);
     }
 }
