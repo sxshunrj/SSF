@@ -16,4 +16,8 @@ public interface TestSuiteService {
     String echo();
 
     String helloWorld(String str);
+
+    void hello(PojoBean bean);
+
+
 }

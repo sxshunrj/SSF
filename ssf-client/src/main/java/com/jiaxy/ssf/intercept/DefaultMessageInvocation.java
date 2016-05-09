@@ -37,16 +37,8 @@ public class DefaultMessageInvocation implements MessageInvocation {
         if ( currentInterceptorIndex > interceptors.size() - 1 ){
             throw new RpcException("the interceptor chain is not correct.please check it");
         }
-        ResponseMessage responseMessage = null;
         MessageInterceptor messageInterceptor = interceptors.get(++currentInterceptorIndex);
-        if ( currentInterceptorIndex == interceptors.size() - 1 ){
-            //last interceptor execute service
-            responseMessage = messageInterceptor.invoke(this,(RequestMessage)message);
-            return responseMessage;
-        } else {
-            responseMessage = messageInterceptor.invoke(this,(RequestMessage)message);
-        }
-        return responseMessage;
+        return messageInterceptor.invoke(this,(RequestMessage)message);
     }
 
     @Override

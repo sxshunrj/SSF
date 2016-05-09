@@ -1,5 +1,6 @@
 package com.jiaxy.ssf.service.impl;
 
+import com.jiaxy.ssf.service.PojoBean;
 import com.jiaxy.ssf.service.TestSuiteService;
 
 /**
@@ -22,5 +23,11 @@ public class TestSuiteServiceImpl implements TestSuiteService{
     @Override
     public String helloWorld(String str) {
         return str +" ssf hello world!";
+    }
+
+    @Override
+    public void hello(PojoBean bean) {
+        System.out.println( bean != null ? bean.toString() :"bean is null");
+
     }
 }

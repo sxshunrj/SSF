@@ -18,7 +18,6 @@ public class ExceptionInterceptor implements MessageInterceptor{
 
     @Override
     public ResponseMessage invoke(MessageInvocation invocation, RequestMessage message) throws Throwable {
-        System.out.println("exception interceptor");
         return invocation.proceed(message);
     }
 }

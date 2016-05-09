@@ -1,11 +1,18 @@
 package com.jiaxy.ssf.config;
 
 import com.jiaxy.ssf.common.ProtocolType;
+import com.jiaxy.ssf.intercept.MessageInterceptor;
+import com.jiaxy.ssf.intercept.MessageInvocation;
+import com.jiaxy.ssf.message.RequestMessage;
+import com.jiaxy.ssf.message.ResponseMessage;
 import com.jiaxy.ssf.service.TestSuiteService;
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class ConsumerConfigTest {
 
@@ -24,13 +31,42 @@ public class ConsumerConfigTest {
     @Test
     public void testRefer() throws Exception {
         TestSuiteService suiteService = consumerConfig.refer();
-        String rs = suiteService.helloWorld("wutao");
-        System.out.println(rs);
+        String rs = suiteService.helloWorld("");
+        assertEquals(" ssf hello world!", rs);
 
+    }
+
+
+    @Test
+    public void testInterceptors() throws Exception {
+        consumerConfig.setInterceptors(Arrays.asList(new BeforeInterceptors(),new AfterInterceptors()));
+        TestSuiteService suiteService = consumerConfig.refer();
+        String rs = suiteService.helloWorld("");
+        assertEquals("after ssf hello world!", rs);
+        rs = suiteService.echo();
+        Assert.assertEquals("afterecho", rs);
     }
 
     @Test
     public void testUnRefer() throws Exception {
 
+    }
+
+
+    class BeforeInterceptors implements MessageInterceptor{
+        @Override
+        public ResponseMessage invoke(MessageInvocation invocation, RequestMessage message) throws Throwable {
+            System.out.println("---before---");
+            return invocation.proceed(message);
+        }
+    }
+
+    class AfterInterceptors implements MessageInterceptor{
+        @Override
+        public ResponseMessage invoke(MessageInvocation invocation, RequestMessage message) throws Throwable {
+            ResponseMessage res = invocation.proceed(message);
+            res.setResponse("after"+res.getResponse());
+            return res;
+        }
     }
 }

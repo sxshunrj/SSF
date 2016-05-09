@@ -12,6 +12,7 @@
         <module>ssf-client</module>
         <module>ssf-regcenter</module>
         <module>ssf-common</module>
+        <module>ssf-test-suite</module>
     </modules>
 
 

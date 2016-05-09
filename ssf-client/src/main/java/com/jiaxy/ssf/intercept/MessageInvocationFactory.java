@@ -37,6 +37,9 @@ public class MessageInvocationFactory {
 
     private static List<MessageInterceptor> buildProviderInterceptors(ProviderConfig providerConfig){
         List<MessageInterceptor> interceptors = new ArrayList<MessageInterceptor>();
+        if (providerConfig.getInterceptors() != null && !providerConfig.getInterceptors().isEmpty()){
+            interceptors.addAll(providerConfig.getInterceptors());
+        }
         //last interceptor.must in the end
         interceptors.add(new ServiceReflectiveMessageInterceptor(providerConfig));
         return interceptors;
@@ -45,6 +48,10 @@ public class MessageInvocationFactory {
     private static List<MessageInterceptor> buildConsumerInterceptors(ConsumerConfig consumerConfig) {
         List<MessageInterceptor> interceptors = new ArrayList<MessageInterceptor>();
         interceptors.add(new ExceptionInterceptor());
+        if (consumerConfig.getInterceptors() != null && !consumerConfig.getInterceptors().isEmpty()){
+            interceptors.addAll(consumerConfig.getInterceptors());
+        }
+        //last interceptor is the invoke
         interceptors.add(new ConsumerMessageInterceptor(consumerConfig));
         return interceptors;
     }
