@@ -1,6 +1,5 @@
 package com.jiaxy.ssf.processor;
 
-import com.jiaxy.ssf.intercept.DefaultMessageInvocation;
 import com.jiaxy.ssf.intercept.MessageInvocation;
 import com.jiaxy.ssf.intercept.MessageInvocationFactory;
 

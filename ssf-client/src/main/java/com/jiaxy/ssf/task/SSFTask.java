@@ -55,8 +55,6 @@ public class SSFTask extends RPCTask {
             } else {
                 handleRequest(requestMessage);
             }
-        } else if ( message instanceof ResponseMessage ){//callback response
-            handleCallbackResponse((ResponseMessage) message);
         } else {
             logger.error("unknown message type . msg :{}",message);
             throw new RpcException("unknown message type");
@@ -114,8 +112,8 @@ public class SSFTask extends RPCTask {
         }
     }
 
+    private void handleCallbackRequest(RequestMessage requestMessage){
 
-    private void handleCallbackResponse(ResponseMessage responseMessage){
-        //TODO handle callback
     }
+
 }
