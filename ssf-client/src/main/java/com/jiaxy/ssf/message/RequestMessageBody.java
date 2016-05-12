@@ -1,5 +1,7 @@
 package com.jiaxy.ssf.message;
 
+import com.jiaxy.ssf.common.ClassUtil;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +31,14 @@ public class RequestMessageBody implements Serializable {
     private Object[] args;
 
     private Map<String,Object> attachments = new HashMap<String, Object>();
+
+    public Class[] getArgsTypeClasses(){
+        try {
+            return ClassUtil.forNames(argsType);
+        } catch (ClassNotFoundException e) {
+            return new Class[0];
+        }
+    }
 
     public String getClassName() {
         return className;

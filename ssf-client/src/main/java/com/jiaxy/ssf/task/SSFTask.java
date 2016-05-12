@@ -2,12 +2,18 @@ package com.jiaxy.ssf.task;
 
 import com.jiaxy.ssf.codec.protocol.Protocol;
 import com.jiaxy.ssf.codec.protocol.ProtocolFactory;
+import com.jiaxy.ssf.common.ProtocolType;
+import com.jiaxy.ssf.common.StringUtil;
 import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.message.*;
+import com.jiaxy.ssf.processor.CallbackProcessor;
 import com.jiaxy.ssf.processor.Processor;
 import com.jiaxy.ssf.processor.ProcessorManager;
+import com.jiaxy.ssf.proxy.ProxyType;
+import com.jiaxy.ssf.proxy.ServiceProxyFactory;
+import com.jiaxy.ssf.service.Callback;
 import com.jiaxy.ssf.transport.ByteBufAllocatorHolder;
-import com.jiaxy.ssf.util.NetUtil;
+import com.jiaxy.ssf.transport.client.ClientTransport;
 import com.jiaxy.ssf.util.ResponseUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -16,7 +22,12 @@ import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+
 import static com.jiaxy.ssf.processor.ProcessorManagerFactory.*;
+import static com.jiaxy.ssf.util.CallbackInfo.*;
+import static com.jiaxy.ssf.util.NetUtil.*;
+import static com.jiaxy.ssf.transport.client.ClientTransportFactory.*;
 
 /**
  * Title: <br>
@@ -50,7 +61,7 @@ public class SSFTask extends RPCTask {
             ResponseMessage responseMessage = null;
             if ( requestMessage.isHeartBeatRequestMsg() ){
                 responseMessage = MessageBuilder.buildHeartbeatResponse(requestMessage);
-                NetUtil.writeAndFlush(channel,responseMessage,true);
+                writeAndFlush(channel, responseMessage, true);
                 return;
             } else {
                 handleRequest(requestMessage);
@@ -78,13 +89,15 @@ public class SSFTask extends RPCTask {
             String serviceName = requestMessage.getServiceName();
             String methodName = requestMessage.getMethodName();
             String alias = requestMessage.getAlias();
-            //TODO handle callback
             ProcessorManager processorManager = getInstance();
             Processor<RequestMessage,ResponseMessage> processor = processorManager.getProcessor(processorKey(serviceName, alias));
             if ( processor == null ){
                 throw new RpcException(String.format("can't found a processor for %s:%s ,alias:%s.maybe the service has not been loaded or no this service export in channel",
-                        NetUtil.channelToString(channel),
-                        serviceName,alias));
+                        channelToString(channel),
+                        serviceName, alias));
+            }
+            if (isCallbackMethod(serviceName,methodName)){
+                handleCallbackRequest(requestMessage, processorManager, channel);
             }
             ResponseMessage responseMessage = processor.execute(requestMessage);
             ByteBuf buf = ByteBufAllocatorHolder.getBuf();
@@ -96,7 +109,7 @@ public class SSFTask extends RPCTask {
                 public void operationComplete(ChannelFuture future) throws Exception {
                     if ( !future.isSuccess() ){
                         logger.error("send response to client error in {}.Cause by:",
-                                NetUtil.channelToString(channel),
+                                channelToString(channel),
                                 future.cause()
                         );
                     }
@@ -112,8 +125,56 @@ public class SSFTask extends RPCTask {
         }
     }
 
-    private void handleCallbackRequest(RequestMessage requestMessage){
 
+    private CallbackProcessor registerCallbackProcessor(ProcessorManager processorManager,Channel channel){
+        String host = ipString((InetSocketAddress) channel.remoteAddress());
+        int port = port((InetSocketAddress) channel.remoteAddress());
+        ClientTransportKey key = buildKey(ProtocolType.SSF,host,port);
+        ClientTransport clientTransport = getClientTransport(key,null);
+        CallbackProcessor callbackProcessor = new CallbackProcessor(clientTransport);
+        processorManager.register(processorKey(host,port),callbackProcessor);
+        return callbackProcessor;
+
+    }
+
+    private CallbackProcessor getCallbackProcessor(ProcessorManager processorManager,Channel channel){
+        CallbackProcessor callbackProcessor = (CallbackProcessor) processorManager.getProcessor(
+                processorKey(
+                        ipString((InetSocketAddress) channel.remoteAddress()),
+                        port((InetSocketAddress) channel.remoteAddress())
+                ));
+        if (callbackProcessor == null){
+            return registerCallbackProcessor(processorManager,channel);
+        } else {
+            return callbackProcessor;
+        }
+    }
+
+
+
+    private void handleCallbackRequest(RequestMessage requestMessage,ProcessorManager processorManager,Channel channel){
+        String callbackInstanceId = (String)requestMessage.getHead().getAttrValue(MessageHead.HeadKey.CALLBACK_INSTANCE_ID.getKey());
+        if (StringUtil.isEmpty(callbackInstanceId)){
+            throw new IllegalArgumentException("callback instance id is empty");
+        }
+        CallbackProcessor callbackProcessor = getCallbackProcessor(processorManager,channel);
+        Callback callback = ServiceProxyFactory.getCallbackProxy(ProxyType.JDK,
+                callbackInstanceId,
+                callbackProcessor);
+        Class[] argTypeClasses = requestMessage.getRequestMessageBody().getArgsTypeClasses();
+        int callbackParamIndex = -1;
+        for ( int i = 0 ;i < argTypeClasses.length ;i++){
+            if (isCallback(argTypeClasses[i])){
+                callbackParamIndex = i;
+                break;
+            }
+        }
+        if (callbackParamIndex == -1){
+            throw new IllegalArgumentException("could not find callback param index in the params");
+        }
+        Object[] objArr = requestMessage.getRequestMessageBody().getArgs();
+        objArr[callbackParamIndex] = callback;
+        requestMessage.getRequestMessageBody().setArgs(objArr);
     }
 
 }

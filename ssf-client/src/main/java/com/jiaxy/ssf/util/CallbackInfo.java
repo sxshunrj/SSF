@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * Description: <br>
  *
- *     cache service some information and util method
+ *     cache callback some information and util method
  *
  * </p>
  *
@@ -21,10 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 2016/05/11 16:54
  */
-public class ServiceInfo {
+public class CallbackInfo {
 
     private static final ConcurrentHashMap<String,Class> callbackParamType = new ConcurrentHashMap<String, Class>();
 
+    private static final ConcurrentHashMap<String,Callback> callbackInstanceCache = new ConcurrentHashMap<String, Callback>();
 
     public static boolean isCallbackMethod(String serviceInterfaceName,String method){
         if (callbackParamType.contains(callbackRegistryKey(serviceInterfaceName,method))){
@@ -53,7 +54,7 @@ public class ServiceInfo {
      *
      * @param serviceInterface
      */
-    public static void callbackRegister(Class serviceInterface){
+    public static void callbackInfoRegister(Class serviceInterface){
         String serviceInterfaceName = serviceInterface.getCanonicalName();
         Method[] serviceMethods = serviceInterface.getDeclaredMethods();
         for (Method serviceMethod:serviceMethods){
@@ -80,10 +81,25 @@ public class ServiceInfo {
                             serviceInterfaceName,
                             serviceMethod.getName()));
                 }
-                callbackRegister(serviceInterfaceName,serviceMethod.getName(),ipoClz);
+                callbackInfoRegister(serviceInterfaceName, serviceMethod.getName(), ipoClz);
             }
         }
     }
+
+    public static void callbackInstanceRegister(String callbackInstanceId,Callback callback){
+        callbackInstanceCache.putIfAbsent(callbackInstanceId,callback);
+    }
+
+    public static Callback getCallbackInstance(String callbackInstanceId){
+        return callbackInstanceCache.get(callbackInstanceId);
+    }
+
+    public static String buildCallbackInstanceId(String host,int pid,Callback callback){
+        Class callbackImpl = callback.getClass();
+        String callbackName = callbackImpl.getCanonicalName() != null ? callbackImpl.getCanonicalName() : callbackImpl.getName();
+        return host+"_"+pid+"_"+callbackName;
+    }
+
 
     private static Class cast2Class(Type type){
         try {
@@ -97,7 +113,7 @@ public class ServiceInfo {
         }
     }
 
-    private static void callbackRegister(String serviceInterfaceName,String method,Class paramClz){
+    private static void callbackInfoRegister(String serviceInterfaceName,String method,Class paramClz){
         String key = callbackRegistryKey(serviceInterfaceName,method);
         callbackParamType.put(key,paramClz);
     }
@@ -129,4 +145,6 @@ public class ServiceInfo {
     private static String callbackRegistryKey(String serviceInterfaceName,String method){
         return serviceInterfaceName+":"+method;
     }
+
+
 }

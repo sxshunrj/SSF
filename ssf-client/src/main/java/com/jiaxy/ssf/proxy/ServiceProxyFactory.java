@@ -36,18 +36,16 @@ public class ServiceProxyFactory {
     /**
      *
      * @param proxyType
-     * @param serviceInterfaceName
-     * @param methodName
+     * @param callbackInstanceId
      * @param processor
      * @return callback proxy instance
      */
-    public static Callback getCallbackProxy(ProxyType proxyType,String serviceInterfaceName,String methodName,CallbackProcessor processor) {
+    public static Callback getCallbackProxy(ProxyType proxyType,String callbackInstanceId,CallbackProcessor processor) {
         Class<Callback> serviceInterfaceClz = Callback.class;
-        String key = serviceInterfaceName +":"+methodName;
-        MethodCallback callback = cacheProxyInstance.get(key);
+        MethodCallback callback = cacheProxyInstance.get(callbackInstanceId);
         if (callback == null){
             callback = new MethodCallback();
-            MethodCallback old = cacheProxyInstance.putIfAbsent(key,callback);
+            MethodCallback old = cacheProxyInstance.putIfAbsent(callbackInstanceId,callback);
             if (old != null){
                 callback = old;
             }
@@ -68,9 +66,8 @@ public class ServiceProxyFactory {
         return callback.getCallback();
     }
 
-    public static void removeCallbackProxy(String serviceInterfaceName,String methodName){
-        String key = serviceInterfaceName +":"+methodName;
-        cacheProxyInstance.remove(key);
+    public static void removeCallbackProxy(String callbackInstanceId){
+        cacheProxyInstance.remove(callbackInstanceId);
     }
 
 

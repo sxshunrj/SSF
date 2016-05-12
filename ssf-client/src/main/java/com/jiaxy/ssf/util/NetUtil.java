@@ -77,6 +77,12 @@ public class NetUtil {
         return ipString(address) +":"+address.getPort();
     }
 
+    public static int port(InetSocketAddress address){
+        if ( address == null ){
+            return -1;
+        }
+        return address.getPort();
+    }
 
     public static void writeAndFlush(final Channel channel, Object object, final boolean showAsError){
         ChannelFuture channelFuture = channel.writeAndFlush(object);

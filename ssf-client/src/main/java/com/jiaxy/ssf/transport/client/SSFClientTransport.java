@@ -54,7 +54,6 @@ public class SSFClientTransport extends AbstractTcpClientTransport {
         }
         MsgFuture<ResponseMessage> msgFuture = new MsgFuture<ResponseMessage>(channel,timeout,msg);
         addMsgFuture(msg,msgFuture);
-        //TODO callback request
         Protocol protocol = ProtocolFactory.getProtocol(ProtocolType.valueOf(msg.getHead().getProtocolType()),
                 CodecType.valueOf(msg.getHead().getCodecType()));
         ByteBuf buf = ByteBufAllocatorHolder.getBuf();

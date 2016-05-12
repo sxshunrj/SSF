@@ -51,8 +51,10 @@ public class MessageInvocationFactory {
         if (consumerConfig.getInterceptors() != null && !consumerConfig.getInterceptors().isEmpty()){
             interceptors.addAll(consumerConfig.getInterceptors());
         }
+        interceptors.add(new CallbackMessageInterceptor());
         //last interceptor is the invoke
         interceptors.add(new ConsumerMessageInterceptor(consumerConfig));
         return interceptors;
     }
+
 }

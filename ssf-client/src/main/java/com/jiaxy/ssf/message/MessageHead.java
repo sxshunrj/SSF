@@ -41,6 +41,18 @@ public class MessageHead implements Serializable,Cloneable {
 
     private ConcurrentHashMap<Byte,Object> attrMap = new ConcurrentHashMap<Byte, Object>();
 
+
+    public void addHeadKey(HeadKey key,Object value){
+        if (!key.valueType.isInstance(value)){
+            throw new IllegalArgumentException(String.format("value type is:%s,the key %s value type must be %s",
+                    value.getClass().getCanonicalName(),
+                    key,
+                    key.valueType.getCanonicalName()));
+        }
+        attrMap.put(key.key,value);
+    }
+
+
     public int getFullLength() {
         return fullLength;
     }
@@ -129,5 +141,29 @@ public class MessageHead implements Serializable,Cloneable {
                 ", msgId=" + msgId +
                 ", attrMap=" + attrMap +
                 '}';
+    }
+
+
+    public enum HeadKey{
+
+        CALLBACK_INSTANCE_ID((byte)1,String.class)
+        ;
+
+        private byte key;
+
+        private Class valueType;
+
+        private HeadKey(byte key, Class valueType) {
+            this.key = key;
+            this.valueType = valueType;
+        }
+
+        public byte getKey() {
+            return key;
+        }
+
+        public Class getValueType() {
+            return valueType;
+        }
     }
 }

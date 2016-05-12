@@ -4,7 +4,7 @@ import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.message.AbstractMessage;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
-import com.jiaxy.ssf.transport.client.SSFClientTransport;
+import com.jiaxy.ssf.transport.client.ClientTransport;
 
 /**
  * Title: <br>
@@ -18,10 +18,10 @@ import com.jiaxy.ssf.transport.client.SSFClientTransport;
  */
 public class CallbackProcessor implements MessageProcessor {
 
-    private SSFClientTransport clientTransport;
+    private ClientTransport clientTransport;
 
 
-    public CallbackProcessor(SSFClientTransport clientTransport) {
+    public CallbackProcessor(ClientTransport clientTransport) {
         this.clientTransport = clientTransport;
     }
 
