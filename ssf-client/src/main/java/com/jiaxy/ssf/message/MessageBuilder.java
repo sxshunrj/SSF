@@ -15,6 +15,12 @@ import com.jiaxy.ssf.common.ClassUtil;
 public class MessageBuilder {
 
 
+    public static RequestMessage buildHeartbeatRequest(){
+        RequestMessage requestMessage = new RequestMessage();
+        requestMessage.getHead().setMessageType(AbstractMessage.HEARTBEAT_REQUEST_MSG);
+        return requestMessage;
+    }
+
     public static ResponseMessage buildHeartbeatResponse(RequestMessage requestMessage){
         ResponseMessage responseMessage = new ResponseMessage(false);
         responseMessage.setHead(requestMessage.getHead().clone());

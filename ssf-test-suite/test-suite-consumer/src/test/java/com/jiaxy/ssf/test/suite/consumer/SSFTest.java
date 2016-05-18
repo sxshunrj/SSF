@@ -47,7 +47,5 @@ public class SSFTest {
         } catch (Throwable e) {
             e.printStackTrace();
         }
-//        rs = service.registryWithCallback("ssf", callback);
-//        Assert.assertEquals("callback:hello ssf message from service",rs);
     }
 }

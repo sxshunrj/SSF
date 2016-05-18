@@ -36,6 +36,18 @@ public class ConsumerConfigTest {
 
     }
 
+    @Test
+    public void testConnectionManager() throws Exception {
+        TestSuiteService suiteService = consumerConfig.refer();
+         synchronized (this){
+            while (true){
+                try {
+                    this.wait();
+                }catch (Exception e){
+                }
+            }
+        }
+    }
 
     @Test
     public void testInterceptors() throws Exception {

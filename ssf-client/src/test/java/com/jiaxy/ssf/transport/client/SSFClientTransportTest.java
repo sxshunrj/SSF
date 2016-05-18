@@ -24,9 +24,11 @@ public class SSFClientTransportTest {
 
     @Before
     public void setUp() throws Exception {
-        ssfServerTransport = new SSFServerTransport(new ServerTransportConfig());
+        ServerTransportConfig serverTransportConfig = new ServerTransportConfig();
+        serverTransportConfig.setPort(31617);
+        ssfServerTransport = new SSFServerTransport(serverTransportConfig);
         ssfServerTransport.start();
-        ssfClientTransport = ClientTransportFactory.getClientTransport(ClientTransportFactory.buildKey(ProtocolType.SSF,"localhost",31616),new ClientTransportConfig());
+        ssfClientTransport = ClientTransportFactory.getClientTransport(ClientTransportFactory.buildKey(ProtocolType.SSF,"localhost",31617),new ClientTransportConfig());
     }
 
     @After

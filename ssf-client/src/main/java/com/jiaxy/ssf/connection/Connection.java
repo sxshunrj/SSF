@@ -2,6 +2,7 @@ package com.jiaxy.ssf.connection;
 
 import com.jiaxy.ssf.registry.Provider;
 import com.jiaxy.ssf.transport.client.ClientTransport;
+import com.jiaxy.ssf.transport.client.ClientTransportListener;
 import com.jiaxy.ssf.util.NetUtil;
 
 import java.util.Observable;
@@ -48,8 +49,18 @@ public class Connection extends Observable {
         return transport;
     }
 
-    public void setTransport(ClientTransport transport) {
+    public void setTransport(final ClientTransport transport) {
         this.transport = transport;
+        transport.addChangeListener(new ClientTransportListener() {
+            @Override
+            public void change() {
+                if (transport.isConnected()){
+                    changeState(ConnectionState.ALIVE);
+                } else {
+                    changeState(ConnectionState.DEAD);
+                }
+            }
+        });
     }
 
     public ConnectionState getState() {

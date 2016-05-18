@@ -91,7 +91,7 @@ public class NetUtil {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if ( !future.isSuccess() && showAsError ){
                     logger.error(" write and flush error:{}",channelToString(channel.localAddress(),channel.remoteAddress()),future.cause());
-                } else {
+                } else if (!future.isSuccess()){
                     logger.warn(" write and flush error:{}", channelToString(channel.localAddress(), channel.remoteAddress()));
                 }
             }

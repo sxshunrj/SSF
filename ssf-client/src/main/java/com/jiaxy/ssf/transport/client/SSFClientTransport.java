@@ -123,6 +123,9 @@ public class SSFClientTransport extends AbstractTcpClientTransport {
             } else {
                 throw new InitException("Failed to connect :"+remoteIP+":"+remotePort,channelFuture.cause());
             }
+            //start heartbeat thread
+            startHeartbeatThread();
+            startRetryConnectThread();
 
         } catch (InitException e){
             throw e;

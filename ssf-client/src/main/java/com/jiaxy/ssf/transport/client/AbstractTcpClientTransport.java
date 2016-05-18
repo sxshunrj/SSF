@@ -1,6 +1,7 @@
 package com.jiaxy.ssf.transport.client;
 
 import com.jiaxy.ssf.config.ClientTransportConfig;
+import com.jiaxy.ssf.connection.Connection;
 import com.jiaxy.ssf.exception.ClientTimeoutException;
 import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.message.AbstractMessage;
@@ -10,6 +11,8 @@ import com.jiaxy.ssf.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,7 +32,6 @@ import static com.jiaxy.ssf.message.AbstractMessage.*;
 public abstract class AbstractTcpClientTransport extends AbstractClientTransport {
 
     private Logger logger = LoggerFactory.getLogger(AbstractTcpClientTransport.class);
-
 
     /**
      *
@@ -102,6 +104,7 @@ public abstract class AbstractTcpClientTransport extends AbstractClientTransport
         msgFutureMap.remove(msgId);
     }
 
+
     abstract MsgFuture doSendAsync(RequestMessage msg,int timeout);
 
     private Integer generateMsgId(){
@@ -120,4 +123,6 @@ public abstract class AbstractTcpClientTransport extends AbstractClientTransport
             logger.error("can't handle this type message:{}",msg);
         }
     }
+
+
 }

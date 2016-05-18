@@ -62,6 +62,10 @@ public class ConnectionManager implements Observer {
         } finally {
             writeLock.unlock();
         }
+        if (logger.isTraceEnabled()){
+            snapshot();
+        }
+        snapshot();
 
     }
 
@@ -181,6 +185,20 @@ public class ConnectionManager implements Observer {
 
     private void removeDeadConnection(Provider provider){
         deadConnections.remove(provider);
+    }
+
+    private void snapshot(){
+        StringBuffer conns = new StringBuffer();
+        conns.append("alive connections:\n")
+                .append(aliveConnections)
+                .append("\n,")
+                .append("retry connections:\n")
+                .append(retryConnections)
+                .append("\n,")
+                .append("dead connections:\n")
+                .append(deadConnections)
+                .append("\n");
+        logger.info(conns.toString());
     }
 
 

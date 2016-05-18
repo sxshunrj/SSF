@@ -58,4 +58,16 @@ public class FailoverClientTest {
     public void testClose() throws Exception {
 
     }
+
+    @Test
+    public void testConnectionManager() throws Exception {
+         synchronized (this){
+            while (true){
+                try {
+                    this.wait();
+                }catch (Exception e){
+                }
+            }
+        }
+    }
 }
