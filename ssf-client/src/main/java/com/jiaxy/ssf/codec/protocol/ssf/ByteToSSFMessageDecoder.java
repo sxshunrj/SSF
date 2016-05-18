@@ -75,6 +75,7 @@ public class ByteToSSFMessageDecoder extends LengthFieldBasedFrameDecoder{
         AbstractMessage message = null;
         try {
             switch ( head.getMessageType() ){
+                case AbstractMessage.CALLBACK_REQUEST_MSG:
 
                 case AbstractMessage.REQUEST_MSG:
                     RequestMessage requestMessage = new RequestMessage(false);
@@ -94,11 +95,12 @@ public class ByteToSSFMessageDecoder extends LengthFieldBasedFrameDecoder{
                     message = new ResponseMessage(false);
                     break;
                 case AbstractMessage.CALLBACK_RESPONSE_MSG:
-                    break;
-                case AbstractMessage.CALLBACK_REQUEST_MSG:
+                    ResponseMessage callbackResponse = new ResponseMessage(false);
+                    callbackResponse.setMsgBodyBuf(buf.slice(buf.readerIndex(), buf.readableBytes()));
+                    message = callbackResponse;
                     break;
                 default:
-                    throw new RpcException("unknown message type:{}"+head.getMessageType());
+                    throw new RpcException(String.format("unknown message type:%s",head.getMessageType()));
             }
             if ( message != null ){
                 message.setHead(head);

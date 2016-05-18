@@ -26,7 +26,8 @@ public class SSFContext {
         if (!StringUtil.isEmpty(LOCAL_HOST)){
             return LOCAL_HOST;
         } else {
-            return NetUtil.getLocalHost();
+            LOCAL_HOST = NetUtil.getLocalHost();
+            return LOCAL_HOST;
         }
     }
 

@@ -1,5 +1,7 @@
 package com.jiaxy.ssf.service;
 
+import java.io.Serializable;
+
 /**
  * Title: <br>
  * <p>
@@ -11,7 +13,7 @@ package com.jiaxy.ssf.service;
  *
  * @since 2016/05/09 18:01
  */
-public interface Callback<I,O> {
+public interface Callback<I,O> extends Serializable {
 
 
     /**
@@ -20,6 +22,6 @@ public interface Callback<I,O> {
      *
      * @return
      */
-    O callback(I ipo);
+    O callback(I ipo) throws RuntimeException;
 
 }

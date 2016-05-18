@@ -40,7 +40,7 @@ public class RequestMessage extends AbstractMessage {
      * @return time out config of the client call
      */
     public Integer getCallTimeout(){
-        Integer timeout = (Integer) getHead().getAttrValue(MessageHead.CLIENT_CALL_TIMEOUT);
+        Integer timeout = (Integer) getHead().getAttrValue(MessageHead.HeadKey.TIMEOUT.getKey());
         if ( timeout == null ){
             return null;
         }
@@ -106,7 +106,7 @@ public class RequestMessage extends AbstractMessage {
     @Override
     public void setHead(MessageHead head) {
         super.setHead(head);
-        if ( this.getHead() != null ){
+        if ( this.getHead() != null && this.getHead().getMessageType() == 0){
             this.getHead().setMessageType(REQUEST_MSG);
         }
 

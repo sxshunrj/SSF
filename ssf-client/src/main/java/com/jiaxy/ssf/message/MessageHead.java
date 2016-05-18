@@ -20,10 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MessageHead implements Serializable,Cloneable {
 
-    //----------------HEAD ATTR CONSTANTS-------------
-    //client call time out key
-    public static final Byte CLIENT_CALL_TIMEOUT = (byte)1;
-
 
     private int fullLength;
 
@@ -146,7 +142,10 @@ public class MessageHead implements Serializable,Cloneable {
 
     public enum HeadKey{
 
-        CALLBACK_INSTANCE_ID((byte)1,String.class)
+        CALLBACK_INSTANCE_ID((byte)1,String.class),
+
+        TIMEOUT((byte)2,Integer.class)
+
         ;
 
         private byte key;

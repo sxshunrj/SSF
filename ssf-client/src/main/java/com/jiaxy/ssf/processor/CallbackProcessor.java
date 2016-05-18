@@ -1,9 +1,7 @@
 package com.jiaxy.ssf.processor;
 
 import com.jiaxy.ssf.common.ProtocolType;
-import com.jiaxy.ssf.message.AbstractMessage;
-import com.jiaxy.ssf.message.RequestMessage;
-import com.jiaxy.ssf.message.ResponseMessage;
+import com.jiaxy.ssf.message.*;
 import com.jiaxy.ssf.transport.client.ClientTransport;
 
 /**
@@ -20,15 +18,17 @@ public class CallbackProcessor implements MessageProcessor {
 
     private ClientTransport clientTransport;
 
+    private String callbackInstanceId;
 
-    public CallbackProcessor(ClientTransport clientTransport) {
+    public CallbackProcessor(ClientTransport clientTransport, String callbackInstanceId) {
         this.clientTransport = clientTransport;
+        this.callbackInstanceId = callbackInstanceId;
     }
 
-    @Override
     public ResponseMessage execute(RequestMessage in) throws Throwable {
         in.getHead().setProtocolType(ProtocolType.SSF.getValue());
         in.getHead().setMessageType(AbstractMessage.CALLBACK_REQUEST_MSG);
+        in.getHead().addHeadKey(MessageHead.HeadKey.CALLBACK_INSTANCE_ID,callbackInstanceId);
         return clientTransport.sendSync(in,5000);//5s
     }
 }

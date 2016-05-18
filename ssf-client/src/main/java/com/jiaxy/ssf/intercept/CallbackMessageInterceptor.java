@@ -3,10 +3,9 @@ package com.jiaxy.ssf.intercept;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
 import com.jiaxy.ssf.service.Callback;
-import com.jiaxy.ssf.util.NetUtil;
 import com.jiaxy.ssf.util.SSFContext;
 
-import static com.jiaxy.ssf.util.CallbackInfo.*;
+import static com.jiaxy.ssf.util.Callbacks.*;
 import static com.jiaxy.ssf.message.MessageHead.HeadKey.CALLBACK_INSTANCE_ID;
 
 /**

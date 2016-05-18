@@ -6,8 +6,6 @@ import com.jiaxy.ssf.service.TestSuiteService;
 import com.jiaxy.ssf.service.impl.TestSuiteServiceImpl;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
-
 public class ServerTest {
 
     @Test
@@ -20,7 +18,7 @@ public class ServerTest {
         serverConfig.setProtocol("ssf");
         serverConfig.setPort(31818);
         serverConfig.setEpoll(false);
-        serverConfig.bindProvider(providerConfig);
+        serverConfig.addProvider(providerConfig);
         serverConfig.start();
         synchronized (this){
             while (true){

@@ -5,21 +5,27 @@ import com.jiaxy.ssf.config.ServerTransportConfig;
 import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.message.AbstractMessage;
 import com.jiaxy.ssf.message.MessageHead;
+import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
 import com.jiaxy.ssf.processor.Processor;
 import com.jiaxy.ssf.processor.ProcessorManager;
 import com.jiaxy.ssf.processor.TaskProcessor;
 import com.jiaxy.ssf.task.RPCTask;
 import com.jiaxy.ssf.task.SSFTask;
+import com.jiaxy.ssf.transport.client.ClientTransport;
+import com.jiaxy.ssf.transport.client.ClientTransportFactory;
+import com.jiaxy.ssf.transport.client.SSFClientTransport;
 import com.jiaxy.ssf.util.NetUtil;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import static com.jiaxy.ssf.processor.ProcessorManagerFactory.getInstance;
 import static com.jiaxy.ssf.processor.ProcessorManagerFactory.processorKey;
+import static com.jiaxy.ssf.util.NetUtil.*;
 
 /**
  * Title: <br>
@@ -54,18 +60,28 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
+
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);
-        ProcessorManager processorManager = getInstance();
-        Processor<RPCTask,Void> processor =  processorManager.getProcessor(processorKey(serverTransportConfig.getHost(),
-                serverTransportConfig.getPort()));
-        try {
-            processor.execute(getTask(ctx.channel(), (AbstractMessage) msg));
-        } catch (Throwable throwable) {
-            throw RpcException.convertToRpcException(throwable);
+        if (msg instanceof RequestMessage){
+            ProcessorManager processorManager = getInstance();
+            Processor<RPCTask,Void> processor =  processorManager.getProcessor(processorKey(serverTransportConfig.getHost(),
+                    serverTransportConfig.getPort()));
+            try {
+                processor.execute(getTask(ctx.channel(), (AbstractMessage) msg));
+            } catch (Throwable throwable) {
+                throw RpcException.convertToRpcException(throwable);
+            }
+        } else if (msg instanceof ResponseMessage){
+            //callback response here
+            String host = ipString((InetSocketAddress) ctx.channel().remoteAddress());
+            int port = port((InetSocketAddress) ctx.channel().remoteAddress());
+            ClientTransportFactory.ClientTransportKey key = ClientTransportFactory.buildKey(ProtocolType.SSF, host, port);
+            SSFClientTransport clientTransport = (SSFClientTransport) ClientTransportFactory.getClientTransport(key,ctx.channel());
+            clientTransport.handleResponse((ResponseMessage) msg);
         }
     }
 

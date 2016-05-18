@@ -7,6 +7,7 @@ import com.jiaxy.ssf.intercept.MessageInvocationFactory;
 import com.jiaxy.ssf.processor.ProcessorManagerFactory;
 import com.jiaxy.ssf.processor.ProviderProcessor;
 import com.jiaxy.ssf.server.ProviderManager;
+import com.jiaxy.ssf.util.Callbacks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,8 @@ public class ProviderConfig<T> extends SSFConfig {
                             ref.getClass().getName(),
                             serviceInterfaceName));
                 }
+                //callback info
+                Callbacks.callbackInfoRegister(serviceClz);
                 MessageInvocation invocation = MessageInvocationFactory.getMessageInvocation(this);
                 ProviderProcessor providerProcessor = new ProviderProcessor(invocation);
                 //register processor for this interface service

@@ -14,7 +14,7 @@ import com.jiaxy.ssf.processor.MessageProcessor;
 import com.jiaxy.ssf.proxy.ProxyType;
 import com.jiaxy.ssf.proxy.ServiceProxyFactory;
 import com.jiaxy.ssf.service.GenericService;
-import com.jiaxy.ssf.util.CallbackInfo;
+import com.jiaxy.ssf.util.Callbacks;
 
 /**
  * Title: <br>
@@ -91,7 +91,7 @@ public class ConsumerConfig<T> extends SSFConfig{
             try {
                 buildClient();
                 //cache callback method info
-                CallbackInfo.callbackInfoRegister(getProxyClass());
+                Callbacks.callbackInfoRegister(getProxyClass());
                 processor = new ConsumerProcessor(MessageInvocationFactory.getMessageInvocation(this),this);
                 proxy = (T) ServiceProxyFactory.getProxy(ProxyType.JDK,getProxyClass(),processor);
                 return proxy;

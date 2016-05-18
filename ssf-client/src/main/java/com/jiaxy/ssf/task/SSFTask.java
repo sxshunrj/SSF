@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 
 import static com.jiaxy.ssf.processor.ProcessorManagerFactory.*;
-import static com.jiaxy.ssf.util.CallbackInfo.*;
+import static com.jiaxy.ssf.util.Callbacks.*;
 import static com.jiaxy.ssf.util.NetUtil.*;
 import static com.jiaxy.ssf.transport.client.ClientTransportFactory.*;
 
@@ -126,25 +126,21 @@ public class SSFTask extends RPCTask {
     }
 
 
-    private CallbackProcessor registerCallbackProcessor(ProcessorManager processorManager,Channel channel){
+    private CallbackProcessor registerCallbackProcessor(ProcessorManager processorManager,String callbackInstanceId,Channel channel){
         String host = ipString((InetSocketAddress) channel.remoteAddress());
         int port = port((InetSocketAddress) channel.remoteAddress());
         ClientTransportKey key = buildKey(ProtocolType.SSF,host,port);
-        ClientTransport clientTransport = getClientTransport(key,null);
-        CallbackProcessor callbackProcessor = new CallbackProcessor(clientTransport);
-        processorManager.register(processorKey(host,port),callbackProcessor);
+        ClientTransport clientTransport = getClientTransport(key,channel);
+        CallbackProcessor callbackProcessor = new CallbackProcessor(clientTransport,callbackInstanceId);
+        processorManager.register(callbackInstanceId,callbackProcessor);
         return callbackProcessor;
 
     }
 
-    private CallbackProcessor getCallbackProcessor(ProcessorManager processorManager,Channel channel){
-        CallbackProcessor callbackProcessor = (CallbackProcessor) processorManager.getProcessor(
-                processorKey(
-                        ipString((InetSocketAddress) channel.remoteAddress()),
-                        port((InetSocketAddress) channel.remoteAddress())
-                ));
+    private CallbackProcessor getCallbackProcessor(ProcessorManager processorManager,String callbackInstanceId,Channel channel){
+        CallbackProcessor callbackProcessor = (CallbackProcessor) processorManager.getProcessor(callbackInstanceId);
         if (callbackProcessor == null){
-            return registerCallbackProcessor(processorManager,channel);
+            return registerCallbackProcessor(processorManager,callbackInstanceId,channel);
         } else {
             return callbackProcessor;
         }
@@ -157,7 +153,7 @@ public class SSFTask extends RPCTask {
         if (StringUtil.isEmpty(callbackInstanceId)){
             throw new IllegalArgumentException("callback instance id is empty");
         }
-        CallbackProcessor callbackProcessor = getCallbackProcessor(processorManager,channel);
+        CallbackProcessor callbackProcessor = getCallbackProcessor(processorManager,callbackInstanceId,channel);
         Callback callback = ServiceProxyFactory.getCallbackProxy(ProxyType.JDK,
                 callbackInstanceId,
                 callbackProcessor);

@@ -24,7 +24,7 @@ import java.util.Map;
  * </p>
  * <pre>
  *+----------------------------------------------------------------------------------------------------------------------+
- *|                                                  MAGIC CODE(1B):COLE                                                 |
+ *|                                                  MAGIC CODE(1B):CEEC                                             |
  *+----------+-----------------------------------------------------------------------------------------------------------+
  *|          |                                       FULL LENGTH:HEAD + BODY -MAGIC                                      |
  *|          +-----------------------------------------------------------------------------------------------------------+
@@ -214,7 +214,7 @@ public class SSFProtocol implements Protocol {
                     attrMap.put(key,value);
                     break;
                 case 2://string
-                    byte strLength = buf.readByte();
+                    int strLength = buf.readShort();
                     byte[] strBytes = new byte[strLength];
                     buf.readBytes(strBytes);
                     attrMap.put(key,new String(strBytes,Constants.DEFAULT_CHARSET));

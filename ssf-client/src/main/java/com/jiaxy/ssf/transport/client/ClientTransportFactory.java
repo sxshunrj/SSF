@@ -2,6 +2,8 @@ package com.jiaxy.ssf.transport.client;
 
 import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.config.ClientTransportConfig;
+import com.jiaxy.ssf.util.NetUtil;
+import io.netty.channel.Channel;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,6 +32,26 @@ public class ClientTransportFactory {
     private final static ConcurrentHashMap<ClientTransport,AtomicInteger> connectionRefCount = new ConcurrentHashMap<ClientTransport,AtomicInteger>();
 
 
+    public static ClientTransport getClientTransport(ClientTransportKey key,Channel channel){
+        ClientTransportContainer ctc = connectionPool.get(key);
+        if ( ctc == null ){
+            ctc = new ClientTransportContainer();
+            ClientTransportContainer oldCtc = connectionPool.putIfAbsent(key,ctc);
+            if ( oldCtc != null ){
+                ctc = oldCtc;
+            }
+        }
+        if ( !ctc.isInitialized() ){
+            synchronized ( ctc ){
+                if ( !ctc.isInitialized() ){
+                    ClientTransport clientTransport = createClientTransport(key,channel);
+                    ctc.setClientTransport(clientTransport);
+                    connectionRefCount.putIfAbsent(clientTransport,new AtomicInteger(0));
+                }
+            }
+        }
+        return ctc.getClientTransport();
+    }
 
 
     public static ClientTransport getClientTransport(ClientTransportKey key,ClientTransportConfig clientTransportConfig){
@@ -72,6 +94,14 @@ public class ClientTransportFactory {
         }
     }
 
+    public static void releaseClientTransportDirectly(ClientTransportKey key){
+        ClientTransportContainer cc = connectionPool.remove(key);
+        if (cc != null && cc.getClientTransport() != null){
+            connectionPool.remove(cc.getClientTransport());
+            connectionRefCount.remove(cc.getClientTransport());
+        }
+    }
+
     public static ClientTransportKey buildKey(ProtocolType protocolType, String ip, int port){
         return new ClientTransportKey(protocolType,ip,port);
     }
@@ -84,6 +114,19 @@ public class ClientTransportFactory {
                 break;
             default:
                 clientTransport = new SSFClientTransport(key.ip,key.port,clientTransportConfig);
+                break;
+        }
+        return clientTransport;
+    }
+
+    private static ClientTransport createClientTransport(ClientTransportKey key,Channel channel){
+        ClientTransport clientTransport = null;
+        switch ( key.protocolType ){
+            case SSF:
+                clientTransport = new SSFClientTransport(key.ip,key.port,channel);
+                break;
+            default:
+                clientTransport = new SSFClientTransport(key.ip,key.port,channel);
                 break;
         }
         return clientTransport;

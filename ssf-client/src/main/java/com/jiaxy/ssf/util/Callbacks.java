@@ -2,11 +2,14 @@ package com.jiaxy.ssf.util;
 
 import com.jiaxy.ssf.exception.InitException;
 import com.jiaxy.ssf.service.Callback;
+import com.jiaxy.ssf.thread.dreamwork.Dreamwork;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Title: <br>
@@ -21,14 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 2016/05/11 16:54
  */
-public class CallbackInfo {
+public class Callbacks {
 
     private static final ConcurrentHashMap<String,Class> callbackParamType = new ConcurrentHashMap<String, Class>();
 
     private static final ConcurrentHashMap<String,Callback> callbackInstanceCache = new ConcurrentHashMap<String, Callback>();
 
+    private static final Dreamwork callbackDreamwork = new Dreamwork(false,5,200,0, TimeUnit.MILLISECONDS,new LinkedBlockingDeque<Runnable>(1000),true);
+
     public static boolean isCallbackMethod(String serviceInterfaceName,String method){
-        if (callbackParamType.contains(callbackRegistryKey(serviceInterfaceName,method))){
+        if (callbackParamType.containsKey(callbackRegistryKey(serviceInterfaceName,method))){
             return true;
         }
         return false;
@@ -98,6 +103,10 @@ public class CallbackInfo {
         Class callbackImpl = callback.getClass();
         String callbackName = callbackImpl.getCanonicalName() != null ? callbackImpl.getCanonicalName() : callbackImpl.getName();
         return host+"_"+pid+"_"+callbackName;
+    }
+
+    public static Dreamwork getCallbackDreamwork(){
+        return callbackDreamwork;
     }
 
 

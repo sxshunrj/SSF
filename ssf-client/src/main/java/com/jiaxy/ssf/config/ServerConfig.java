@@ -91,13 +91,13 @@ public class ServerConfig {
     }
 
 
-    public void bindProvider(ProviderConfig providerConfig){
+    public void addProvider(ProviderConfig providerConfig){
         if (!providerConfigs.contains(providerConfig)){
             providerConfigs.add(providerConfig);
         }
     }
 
-    public void unBindProvider(ProviderConfig providerConfig){
+    public void removeProvider(ProviderConfig providerConfig){
         providerConfigs.remove(providerConfig);
     }
 

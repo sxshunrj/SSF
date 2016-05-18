@@ -46,6 +46,10 @@ public class SSFClientTransport extends AbstractTcpClientTransport {
         super(ip, port, clientTransportConfig);
     }
 
+    public SSFClientTransport(String ip, int port, Channel channel) {
+        super(ip,port,null);
+        this.channel = channel;
+    }
 
     @Override
     MsgFuture doSendAsync(RequestMessage msg, int timeout) {

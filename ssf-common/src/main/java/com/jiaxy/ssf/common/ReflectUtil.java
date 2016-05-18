@@ -34,7 +34,7 @@ public class ReflectUtil {
         if (e instanceof Error){
             throw (Error)e;
         }
-        throw new UndeclaredThrowableException(e);
+        throw new RuntimeException(e);
     }
 
     private static void handleReflectionException(Exception e){
@@ -43,7 +43,7 @@ public class ReflectUtil {
         } else if (e instanceof IllegalAccessException){
             throw new IllegalStateException("Could not access method: " + e.getMessage());
         } else if (e instanceof InvocationTargetException){
-            rethrowRuntimeException(e);
+            rethrowRuntimeException(e.getCause());
         } else if (e instanceof RuntimeException){
             throw (RuntimeException)e;
         }
