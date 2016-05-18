@@ -38,7 +38,7 @@ public class ConsumerConfig<T> extends SSFConfig{
     /**
      * 5s
      */
-    public static final int TIMEOUT_VALUE = 5000;
+    private int timeout = 5000;
 
     private ProtocolType protocol;
 
@@ -156,7 +156,7 @@ public class ConsumerConfig<T> extends SSFConfig{
     }
 
     public int methodTimeout(String method){
-        return (Integer)getMethodConfigValue(method,TIMEOUT,TIMEOUT_VALUE);
+        return (Integer)getMethodConfigValue(method,TIMEOUT,getTimeout());
     }
 
     public ProtocolType getProtocol() {
@@ -285,5 +285,13 @@ public class ConsumerConfig<T> extends SSFConfig{
 
     public void setPayload(int payload) {
         this.payload = payload;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 }

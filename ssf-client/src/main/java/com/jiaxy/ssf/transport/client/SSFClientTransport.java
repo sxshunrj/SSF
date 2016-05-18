@@ -49,6 +49,8 @@ public class SSFClientTransport extends AbstractTcpClientTransport {
     public SSFClientTransport(String ip, int port, Channel channel) {
         super(ip,port,null);
         this.channel = channel;
+        setLocalAddress((InetSocketAddress) channel.localAddress());
+        setRemoteAddress((InetSocketAddress) channel.remoteAddress());
     }
 
     @Override

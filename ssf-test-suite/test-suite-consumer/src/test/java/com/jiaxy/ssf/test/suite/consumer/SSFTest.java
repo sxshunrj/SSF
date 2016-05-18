@@ -39,6 +39,7 @@ public class SSFTest {
         consumerConfig.setUrl("ssf://127.0.0.1:31919?weight=200,ssf://127.0.0.1:31919");
         consumerConfig.setProtocol(ProtocolType.SSF);
         consumerConfig.setRetries(0);
+        consumerConfig.setTimeout(1000);
         IService service = consumerConfig.refer();
         try {
             String rs = service.registryWithCallback("ssf", callback);

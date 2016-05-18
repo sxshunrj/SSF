@@ -2,6 +2,7 @@ package com.jiaxy.ssf.proxy;
 
 import com.jiaxy.ssf.processor.CallbackProcessor;
 import com.jiaxy.ssf.processor.MessageProcessor;
+import com.jiaxy.ssf.processor.ProcessorManagerFactory;
 import com.jiaxy.ssf.service.Callback;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,6 +69,7 @@ public class ServiceProxyFactory {
 
     public static void removeCallbackProxy(String callbackInstanceId){
         cacheProxyInstance.remove(callbackInstanceId);
+        ProcessorManagerFactory.getInstance().unRegister(callbackInstanceId);
     }
 
 

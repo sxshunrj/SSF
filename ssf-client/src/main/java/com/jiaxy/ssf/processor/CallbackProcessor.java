@@ -1,8 +1,11 @@
 package com.jiaxy.ssf.processor;
 
 import com.jiaxy.ssf.common.ProtocolType;
+import com.jiaxy.ssf.exception.RpcException;
 import com.jiaxy.ssf.message.*;
+import com.jiaxy.ssf.proxy.ServiceProxyFactory;
 import com.jiaxy.ssf.transport.client.ClientTransport;
+import com.jiaxy.ssf.util.NetUtil;
 
 /**
  * Title: <br>
@@ -29,6 +32,14 @@ public class CallbackProcessor implements MessageProcessor {
         in.getHead().setProtocolType(ProtocolType.SSF.getValue());
         in.getHead().setMessageType(AbstractMessage.CALLBACK_REQUEST_MSG);
         in.getHead().addHeadKey(MessageHead.HeadKey.CALLBACK_INSTANCE_ID,callbackInstanceId);
+        if (!clientTransport.isConnected()){
+            ServiceProxyFactory.removeCallbackProxy(callbackInstanceId);
+            ResponseMessage responseMessage = MessageBuilder.buildResponseMessage(in);
+            responseMessage.getHead().setMessageType(AbstractMessage.CALLBACK_RESPONSE_MSG);
+            responseMessage.setException(new RpcException(String.format("send callback request failed.channel %s is inactive",
+                    NetUtil.channelToString(clientTransport.getLocalAddress(),clientTransport.getRemoteAddress()))));
+            return responseMessage;
+        }
         return clientTransport.sendSync(in,5000);//5s
     }
 }
