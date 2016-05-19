@@ -164,6 +164,4 @@ public abstract class AbstractClientTransport implements ClientTransport {
             }
         }
     }
-
-
 }
