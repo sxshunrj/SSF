@@ -151,6 +151,7 @@ public abstract class AbstractClientTransport implements ClientTransport {
             if (responseMessage.isError()){
                 logger.error("send heartbeat error in channel:{}",
                         NetUtil.channelToString(localAddress,remoteAddress),responseMessage.getException());
+                //TODO handle the channel is open ,but the hb is error
                 doHeartbeat = false;
             }
         } catch (Throwable e){
