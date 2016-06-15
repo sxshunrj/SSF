@@ -15,7 +15,7 @@ public class CommonUtil {
 
     /**
      *
-     * @return cpu 核数
+     * @return cpu cores
      */
     public static int getCpuCores(){
         return Runtime.getRuntime().availableProcessors();
