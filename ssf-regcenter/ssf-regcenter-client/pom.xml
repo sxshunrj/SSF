@@ -22,6 +22,7 @@
             <artifactId>copycat-client</artifactId>
             <version>${atomix.version}</version>
         </dependency>
+
     </dependencies>
 
 

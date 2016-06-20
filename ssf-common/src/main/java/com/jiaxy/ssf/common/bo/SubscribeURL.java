@@ -44,4 +44,21 @@ public class SubscribeURL implements Serializable{
     public void setProviderList(List<SSFURL> providerList) {
         this.providerList = providerList;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SubscribeURL that = (SubscribeURL) o;
+
+        if (sourceURL != null ? !sourceURL.equals(that.sourceURL) : that.sourceURL != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return sourceURL != null ? sourceURL.hashCode() : 0;
+    }
 }

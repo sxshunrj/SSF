@@ -2,10 +2,7 @@ package com.jiaxy.ssf.regcenter.server;
 
 import com.jiaxy.ssf.common.bo.SSFURL;
 import com.jiaxy.ssf.common.bo.SubscribeURL;
-import com.jiaxy.ssf.regcenter.common.RegisterCommand;
-import com.jiaxy.ssf.regcenter.common.SubscribeCommand;
-import com.jiaxy.ssf.regcenter.common.UnRegisterCommand;
-import com.jiaxy.ssf.regcenter.common.UnSubscribeCommand;
+import com.jiaxy.ssf.regcenter.common.*;
 import io.atomix.copycat.server.Commit;
 import io.atomix.copycat.server.StateMachine;
 import io.atomix.copycat.server.session.ServerSession;
@@ -49,7 +46,7 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
         rcMap.put(key, providerList);
         Set<ServerSession> subscribedSessions = subscribeSessionMap.get(buildKey(ssfurl));
         if (subscribedSessions != null){
-            subscribedSessions.parallelStream().forEach(session -> session.publish("provider.add", ssfurl));
+            subscribedSessions.parallelStream().forEach(session -> session.publish(Constants.PROVIDER_ADD_EVENT, ssfurl));
         }
         return ssfurl;
     }
@@ -65,7 +62,7 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
                 registeredCommand.close();
                 Set<ServerSession> subscribedSessions = subscribeSessionMap.get(buildKey(ssfurl));
                 if (subscribedSessions != null){
-                    subscribedSessions.parallelStream().forEach(session -> session.publish("provider.remove", ssfurl));
+                    subscribedSessions.parallelStream().forEach(session -> session.publish(Constants.PROVIDER_REMOVE_EVENT, ssfurl));
                 }
             } catch (Exception e) {
                 logger.error("close RegisterCommand error", e);
@@ -104,7 +101,7 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
         try {
             SubscribeURL subscribeURL = commit.operation().subscribeURL();
             Commit<SubscribeCommand> subscribedCommand = findSubscribedCommand(subscribeURL);
-            removeSubscribeSession(subscribeURL,commit.session());
+            removeSubscribeSession(subscribeURL,subscribedCommand.session());
             if (subscribedCommand == null) {
                 return false;
             }
@@ -120,22 +117,22 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
 
     @Override
     public void register(ServerSession session) {
-        logger.info("register session:{}",session.id());
+        logger.debug("register session:{}", session.id());
     }
 
     @Override
     public void unregister(ServerSession session) {
-        logger.info("unregister session:{}",session.id());
+        logger.debug("unregister session:{}", session.id());
     }
 
     @Override
     public void expire(ServerSession session) {
-        logger.info("expire session:{}",session.id());
+        logger.debug("expire session:{}", session.id());
     }
 
     @Override
     public void close(ServerSession session) {
-        logger.info("close session:{}",session.id());
+        logger.debug("close session:{}", session.id());
         subscribeSessionMap.forEach( (key,set) -> {
             Iterator<ServerSession> iterator = set.iterator();
             while (iterator.hasNext()){
@@ -150,6 +147,10 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
 
     private String buildKey(SSFURL ssfurl){
         return ssfurl.getProtocol()+"#"+ssfurl.getServiceName()+"#"+ssfurl.getAlias();
+    }
+
+    private String buildSubscribeKey(SSFURL ssfurl){
+        return ssfurl.getIp()+"#"+ssfurl.getPid();
     }
 
     private Commit<RegisterCommand> findRegisteredCommand(SSFURL ssfurl){

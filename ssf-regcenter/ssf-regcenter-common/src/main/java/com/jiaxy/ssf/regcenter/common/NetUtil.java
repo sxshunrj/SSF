@@ -1,4 +1,4 @@
-package com.jiaxy.ssf.regcenter.client;
+package com.jiaxy.ssf.regcenter.common;
 
 import com.jiaxy.ssf.common.Constants;
 import com.jiaxy.ssf.common.StringUtil;
@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
  * Title: <br>
  * <p>
  * Description: <br>
- *     TODO temporary
  * </p>
  *
  * @author <a href=mailto:taobaorun@gmail.com>wutao</a>
@@ -230,13 +229,6 @@ public class NetUtil {
         }
         return null;
     }
-
-
-    public static String tryActualHostByRegistryAddress(String registry){
-        //TODO try connecting registry address
-        return getLocalHost();
-    }
-
 
     public static String getLocalHost(){
         InetAddress address = getLocalAddress();
