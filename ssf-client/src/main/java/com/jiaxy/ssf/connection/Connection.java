@@ -7,6 +7,9 @@ import com.jiaxy.ssf.util.NetUtil;
 
 import java.util.Observable;
 
+import static com.jiaxy.ssf.transport.client.ClientTransportFactory.ClientTransportKey;
+import static com.jiaxy.ssf.transport.client.ClientTransportFactory.releaseClientTransport;
+
 /**
  * Title: <br>
  * <p>
@@ -21,7 +24,7 @@ public class Connection extends Observable {
 
     private Provider provider;
 
-    private ClientTransport transport;
+    private TransportPair transportPair;
 
     private ConnectionState state;
 
@@ -31,7 +34,7 @@ public class Connection extends Observable {
     }
 
     public boolean isConnected(){
-        if ( transport != null && transport.isConnected()){
+        if ( transportPair != null && transportPair.transport != null && transportPair.transport.isConnected()){
             return true;
         }
         return false;
@@ -46,12 +49,19 @@ public class Connection extends Observable {
     }
 
     public ClientTransport getTransport() {
-        return transport;
+        if (transportPair != null){
+            return transportPair.transport;
+        } else {
+            return null;
+        }
     }
 
-    public void setTransport(final ClientTransport transport) {
-        this.transport = transport;
-        transport.addChangeListener(new ClientTransportListener() {
+    public void setTransport(ClientTransportKey transportKey,final ClientTransport transport) {
+        transportPair = new TransportPair(transportKey,transport);
+        if (transport == null){
+            return;
+        }
+        transport.addChangeListener(this,new ClientTransportListener() {
             @Override
             public void change() {
                 if (transport.isConnected()){
@@ -78,10 +88,52 @@ public class Connection extends Observable {
         notifyObservers(oldState);
     }
 
+    public void close(){
+        if (transportPair != null){
+            releaseClientTransport(transportPair.key, transportPair.transport);
+            transportPair.transport.removeChangeListener(this);
+            transportPair.transport = null;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Connection that = (Connection) o;
+
+        if (provider != null ? !provider.equals(that.provider) : that.provider != null) return false;
+        if (transportPair != null ? !transportPair.equals(that.transportPair) : that.transportPair != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = provider != null ? provider.hashCode() : 0;
+        result = 31 * result + (transportPair != null ? transportPair.hashCode() : 0);
+        return result;
+    }
+
+    private class TransportPair{
+
+        private ClientTransportKey key;
+
+        private ClientTransport transport;
+
+        public TransportPair(ClientTransportKey key, ClientTransport transport) {
+            this.key = key;
+            this.transport = transport;
+        }
+
+    }
+
     @Override
     public String toString() {
-        return transport != null ?
-                NetUtil.channelToString(transport.getLocalAddress(),transport.getRemoteAddress()) :
+        return transportPair != null && transportPair.transport != null ?
+                NetUtil.channelToString(transportPair.transport.getLocalAddress(),transportPair.transport.getRemoteAddress()) :
                 provider.toString();
     }
 }

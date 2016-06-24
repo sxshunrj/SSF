@@ -41,6 +41,7 @@ public class SubscribeURL implements Serializable{
         return providerList;
     }
 
+
     public void setProviderList(List<SSFURL> providerList) {
         this.providerList = providerList;
     }

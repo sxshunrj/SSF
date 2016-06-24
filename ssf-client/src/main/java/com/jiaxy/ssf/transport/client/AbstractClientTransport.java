@@ -42,7 +42,7 @@ public abstract class AbstractClientTransport implements ClientTransport {
 
     protected AtomicInteger currentRequests = new AtomicInteger();
 
-    protected CopyOnWriteArraySet<ClientTransportListener> listeners = new CopyOnWriteArraySet<ClientTransportListener>();
+    protected ConcurrentHashMap<Object,ClientTransportListener> listeners = new ConcurrentHashMap<>();
 
     protected final ScheduledExecutorService hbThread = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("SSF-HB-"+ NetUtil.ipPortString(remoteAddress)+"-"));
 
@@ -94,8 +94,19 @@ public abstract class AbstractClientTransport implements ClientTransport {
     }
 
     @Override
-    public void addChangeListener(ClientTransportListener listener) {
-        listeners.add(listener);
+    public void addChangeListener(Object key,ClientTransportListener listener) {
+        listeners.put(key, listener);
+    }
+
+    @Override
+    public void removeChangeListener(Object key) {
+        listeners.remove(key);
+    }
+
+    @Override
+    public void disConnect() {
+        retryConnectThread.shutdownNow();
+        hbThread.shutdownNow();
     }
 
     protected void startHeartbeatThread(){
@@ -114,7 +125,7 @@ public abstract class AbstractClientTransport implements ClientTransport {
     }
 
     protected void startRetryConnectThread(){
-        if (retryConnectThreadStart){
+        if (!retryConnectThreadStart){
             return;
         }
         retryConnectThreadStart = true;
@@ -125,6 +136,9 @@ public abstract class AbstractClientTransport implements ClientTransport {
                if (doHeartbeat){
                    return;
                }
+               if (isConnected()){
+                   return;
+               }
                try {
                    connect();
                }catch (Throwable e){
@@ -132,7 +146,7 @@ public abstract class AbstractClientTransport implements ClientTransport {
                if (isConnected()){
                    logger.info("{} connected by retry",NetUtil.channelToString(localAddress,remoteAddress));
                    doHeartbeat = true;
-                   for (ClientTransportListener listener : listeners){
+                   for (ClientTransportListener listener : listeners.values()){
                        listener.change();
                    }
                }
@@ -160,7 +174,7 @@ public abstract class AbstractClientTransport implements ClientTransport {
             doHeartbeat = false;
         }
         if (!doHeartbeat){
-            for (ClientTransportListener listener : listeners){
+            for (ClientTransportListener listener : listeners.values()){
                 listener.change();
             }
         }

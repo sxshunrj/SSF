@@ -29,6 +29,7 @@ public class SSFClientTransportTest {
         ssfServerTransport = new SSFServerTransport(serverTransportConfig);
         ssfServerTransport.start();
         ssfClientTransport = ClientTransportFactory.getClientTransport(ClientTransportFactory.buildKey(ProtocolType.SSF,"localhost",31617),new ClientTransportConfig());
+        ssfClientTransport.connect();
     }
 
     @After

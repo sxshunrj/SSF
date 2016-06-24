@@ -2,6 +2,7 @@ package com.jiaxy.ssf.regcenter.common;
 
 import com.jiaxy.ssf.common.bo.SSFURL;
 import io.atomix.copycat.Command;
+import io.atomix.copycat.server.session.ServerSession;
 
 /**
  * Title: <br>

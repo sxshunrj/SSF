@@ -4,6 +4,8 @@ import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.util.NetUtil;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ClientTransportFactory {
 
+    private static final Logger logger = LoggerFactory.getLogger(ClientTransportFactory.class);
 
     /**
      * one connection is shared by ip and port and protocol
@@ -51,6 +54,7 @@ public class ClientTransportFactory {
                 }
             }
         }
+        connectionRefCount.get(ctc.getClientTransport()).incrementAndGet();
         return ctc.getClientTransport();
     }
 
@@ -69,17 +73,16 @@ public class ClientTransportFactory {
                 if ( !ctc.isInitialized() ){
                     ClientTransport clientTransport = createClientTransport(key,clientTransportConfig);
                     ctc.setClientTransport(clientTransport);
-                    //connect the server
-                    clientTransport.connect();
                     connectionRefCount.putIfAbsent(clientTransport,new AtomicInteger(0));
                 }
             }
         }
+        connectionRefCount.get(ctc.getClientTransport()).incrementAndGet();
         return ctc.getClientTransport();
     }
 
 
-    public static void releaseClientTransport(ClientTransportKey key,ClientTransport clientTransport,int timeout){
+    public static void releaseClientTransport(ClientTransportKey key,ClientTransport clientTransport){
         if ( clientTransport == null ){
             return;
         }
@@ -89,17 +92,17 @@ public class ClientTransportFactory {
             clientTransport.disConnect();
             return;
         }
-        if ( count.get() <= 0 ){
-            connectionPool.remove(key);
-            clientTransport.disConnect();
+        if ( count.decrementAndGet() <= 0 ){
+            releaseClientTransportDirectly(key);
         }
     }
 
     public static void releaseClientTransportDirectly(ClientTransportKey key){
         ClientTransportContainer cc = connectionPool.remove(key);
         if (cc != null && cc.getClientTransport() != null){
-            connectionPool.remove(cc.getClientTransport());
             connectionRefCount.remove(cc.getClientTransport());
+            cc.getClientTransport().disConnect();
+            logger.info("release client transport:{} -> {}",cc.clientTransport.getLocalAddress(),cc.clientTransport.getRemoteAddress());
         }
     }
 

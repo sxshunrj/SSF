@@ -4,7 +4,10 @@ import com.jiaxy.ssf.common.bo.SSFURL;
 import com.jiaxy.ssf.common.bo.SubscribeURL;
 import com.jiaxy.ssf.regcenter.DiscoveryEvent;
 import com.jiaxy.ssf.regcenter.client.RegClient;
-import com.jiaxy.ssf.regcenter.common.*;
+import com.jiaxy.ssf.regcenter.common.RegisterCommand;
+import com.jiaxy.ssf.regcenter.common.SubscribeCommand;
+import com.jiaxy.ssf.regcenter.common.UnRegisterCommand;
+import com.jiaxy.ssf.regcenter.common.UnSubscribeCommand;
 import io.atomix.catalyst.transport.Address;
 import io.atomix.catalyst.transport.netty.NettyTransport;
 import io.atomix.copycat.client.ConnectionStrategies;
@@ -93,6 +96,17 @@ public class CopycatRegClient implements RegClient {
             return copycatClient.submit(new UnSubscribeCommand(subscribeURL)).get();
         } catch (Throwable e){
             logger.error("unSubscribe {} failed.",subscribeURL,e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean close() {
+        try {
+            copycatClient.close().get();
+            return true;
+        } catch (Exception e) {
+            logger.error("close copycat client failed",e);
             return false;
         }
     }

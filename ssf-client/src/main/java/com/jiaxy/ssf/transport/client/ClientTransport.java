@@ -82,7 +82,9 @@ public interface ClientTransport {
     int currentRequests();
 
 
-    void addChangeListener(ClientTransportListener listener);
+    void addChangeListener(Object key,ClientTransportListener listener);
+
+    void removeChangeListener(Object key);
 
 
 }

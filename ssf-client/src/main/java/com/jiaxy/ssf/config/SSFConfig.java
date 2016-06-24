@@ -1,6 +1,7 @@
 package com.jiaxy.ssf.config;
 
 import com.jiaxy.ssf.common.Constants;
+import com.jiaxy.ssf.common.ProtocolType;
 import com.jiaxy.ssf.exception.InitException;
 import com.jiaxy.ssf.intercept.MessageInterceptor;
 
@@ -45,6 +46,8 @@ public abstract class SSFConfig extends AbstractConfig {
     protected Map<String,String> parameters;
 
     protected Compress compress;
+
+    protected ProtocolType protocol;
 
     protected transient volatile ConcurrentHashMap<String,Object> confCache = new ConcurrentHashMap<String, Object>();
 
@@ -134,5 +137,13 @@ public abstract class SSFConfig extends AbstractConfig {
 
     public void setCompress(Compress compress) {
         this.compress = compress;
+    }
+
+    public ProtocolType getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(ProtocolType protocol) {
+        this.protocol = protocol;
     }
 }

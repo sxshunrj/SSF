@@ -3,6 +3,7 @@ package com.jiaxy.ssf.regcenter.server;
 import com.jiaxy.ssf.common.bo.SSFURL;
 import com.jiaxy.ssf.common.bo.SubscribeURL;
 import com.jiaxy.ssf.regcenter.common.*;
+import io.atomix.copycat.Command;
 import io.atomix.copycat.server.Commit;
 import io.atomix.copycat.server.StateMachine;
 import io.atomix.copycat.server.session.ServerSession;
@@ -11,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -33,8 +37,14 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
 
     private Map<String,Set<ServerSession>> subscribeSessionMap = new HashMap<>();
 
+    private transient Map<ServerSession,Commit<RegisterCommand>> rcSessions = new HashMap<>();
+
+    private transient Map<ServerSession,Commit<SubscribeCommand>> subscribeSessions = new HashMap<>();
+
 
     public SSFURL register(Commit<RegisterCommand> commit) {
+        //bind session
+        rcSessions.put(commit.session(),commit);
         SSFURL ssfurl = commit.operation().ssfurl();
         ssfurl.setStartTime(System.currentTimeMillis());
         String key = buildKey(ssfurl);
@@ -54,16 +64,14 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
     public boolean unRegister(Commit<UnRegisterCommand> commit) {
         try {
             SSFURL ssfurl = commit.operation().ssfurl();
-            Commit<RegisterCommand> registeredCommand = findRegisteredCommand(ssfurl);
+            String key = buildKey(ssfurl);
+            Commit<RegisterCommand> registeredCommand = findRegisteredCommand(key,
+                    command -> ssfurl.equals(command.ssfurl()));
             if (registeredCommand == null){
                 return false;
             }
             try {
                 registeredCommand.close();
-                Set<ServerSession> subscribedSessions = subscribeSessionMap.get(buildKey(ssfurl));
-                if (subscribedSessions != null){
-                    subscribedSessions.parallelStream().forEach(session -> session.publish(Constants.PROVIDER_REMOVE_EVENT, ssfurl));
-                }
             } catch (Exception e) {
                 logger.error("close RegisterCommand error", e);
                 return false;
@@ -79,6 +87,8 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
 
 
     public SubscribeURL subscribe(Commit<SubscribeCommand> commit){
+        //bind session
+        subscribeSessions.put(commit.session(),commit);
         SubscribeURL subscribeURL = commit.operation().subscribeURL();
         String key = buildKey(subscribeURL.getSourceURL());
         List<Commit<SubscribeCommand>> subscribeList = subscribeMap.get(key);
@@ -100,7 +110,9 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
     public boolean unSubscribe(Commit<UnSubscribeCommand> commit) {
         try {
             SubscribeURL subscribeURL = commit.operation().subscribeURL();
-            Commit<SubscribeCommand> subscribedCommand = findSubscribedCommand(subscribeURL);
+            String key = buildKey(subscribeURL.getSourceURL());
+            Commit<SubscribeCommand> subscribedCommand = findSubscribedCommand(key,
+                    command -> subscribeURL.equals(command.subscribeURL()));
             removeSubscribeSession(subscribeURL,subscribedCommand.session());
             if (subscribedCommand == null) {
                 return false;
@@ -143,6 +155,15 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
                 }
             }
         });
+        //close expired commit
+        closeExpiredCommit(session ,
+                s -> rcSessions.get(s),
+                (Command c) -> findRegisteredCommand
+                        (buildKey(((RegisterCommand) c).ssfurl()),
+                                registerCommand -> registerCommand.ssfurl().equals(((RegisterCommand) c).ssfurl())));
+        closeExpiredCommit(session ,s -> subscribeSessions.get(s),(Command c) -> findSubscribedCommand
+                (buildKey(((SubscribeCommand) c).subscribeURL().getSourceURL()),
+                        subscribeCommand -> subscribeCommand.subscribeURL().equals(((SubscribeCommand) c).subscribeURL())));
     }
 
     private String buildKey(SSFURL ssfurl){
@@ -153,8 +174,7 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
         return ssfurl.getIp()+"#"+ssfurl.getPid();
     }
 
-    private Commit<RegisterCommand> findRegisteredCommand(SSFURL ssfurl){
-        String key = buildKey(ssfurl);
+    private Commit<RegisterCommand> findRegisteredCommand(String key,Predicate<RegisterCommand> predicate){
         List<Commit<RegisterCommand>> providerList = rcMap.get(key);
         if (providerList == null) {
             return null;
@@ -162,16 +182,20 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
         Iterator<Commit<RegisterCommand>> iterator = providerList.iterator();
         while (iterator.hasNext()){
             Commit<RegisterCommand> registerCommandCommit = iterator.next();
-            if (ssfurl.equals(registerCommandCommit.operation().ssfurl())){
+            if (predicate.test(registerCommandCommit.operation())){
                 iterator.remove();
+                logger.info("remove register provider:{}",registerCommandCommit.operation().ssfurl());
+                Set<ServerSession> subscribedSessions = subscribeSessionMap.get(key);
+                if (subscribedSessions != null){
+                    subscribedSessions.parallelStream().forEach(session -> session.publish(Constants.PROVIDER_REMOVE_EVENT, registerCommandCommit.operation().ssfurl()));
+                }
                 return registerCommandCommit;
             }
         }
         return null;
     }
 
-    private Commit<SubscribeCommand> findSubscribedCommand(SubscribeURL subscribeURL){
-        String key = buildKey(subscribeURL.getSourceURL());
+    private Commit<SubscribeCommand> findSubscribedCommand(String key,Predicate<SubscribeCommand> predicate){
         List<Commit<SubscribeCommand>> subscribedList = subscribeMap.get(key);
         if (subscribedList == null) {
             return null;
@@ -179,7 +203,7 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
         Iterator<Commit<SubscribeCommand>> iterator = subscribedList.iterator();
         while (iterator.hasNext()){
             Commit<SubscribeCommand> subscribeCommandCommit = iterator.next();
-            if (subscribeURL.equals(subscribeCommandCommit.operation().subscribeURL())){
+            if (predicate.test(subscribeCommandCommit.operation())){
                 iterator.remove();
                 return subscribeCommandCommit;
             }
@@ -213,5 +237,15 @@ public class RegistrationStateMachine extends StateMachine implements SessionLis
                 }
             }
         }
+    }
+
+
+    private void closeExpiredCommit(ServerSession serverSession, Function<ServerSession,Commit> function,Consumer<Command> consumer){
+        Optional<Commit> optional;
+        optional = Optional.ofNullable(function.apply(serverSession));
+        optional.ifPresent(c -> {
+            consumer.accept((Command)c.operation());
+            logger.info("close {} for closed session:{}",c,serverSession);
+        });
     }
 }

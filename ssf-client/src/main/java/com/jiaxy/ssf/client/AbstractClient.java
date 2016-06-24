@@ -2,6 +2,7 @@ package com.jiaxy.ssf.client;
 
 import com.jiaxy.ssf.client.balance.*;
 import com.jiaxy.ssf.common.StringUtil;
+import com.jiaxy.ssf.common.bo.SSFURL;
 import com.jiaxy.ssf.config.ClientTransportConfig;
 import com.jiaxy.ssf.config.ConsumerConfig;
 import com.jiaxy.ssf.connection.Connection;
@@ -10,20 +11,26 @@ import com.jiaxy.ssf.exception.ConnectionClosedException;
 import com.jiaxy.ssf.exception.NoAliveProviderException;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
+import com.jiaxy.ssf.regcenter.DiscoveryEvent;
+import com.jiaxy.ssf.regcenter.client.RegClient;
+import com.jiaxy.ssf.regcenter.common.Constants;
 import com.jiaxy.ssf.registry.Provider;
 import com.jiaxy.ssf.thread.NamedThreadFactory;
 import com.jiaxy.ssf.thread.dreamwork.AbstractDreamTask;
 import com.jiaxy.ssf.thread.dreamwork.Dreamwork;
 import com.jiaxy.ssf.transport.client.ClientTransport;
+import com.jiaxy.ssf.transport.client.ClientTransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static com.jiaxy.ssf.connection.ConnectionState.*;
 import static com.jiaxy.ssf.transport.client.ClientTransportFactory.buildKey;
@@ -134,7 +141,7 @@ public abstract class AbstractClient implements Client {
 
 
     protected List<Provider> buildProviderList(){
-        List<Provider> providers = new ArrayList<Provider>();
+        List<Provider> providers = new ArrayList<>();
         String urls = consumerConfig.getUrl();
         //1、direct url
         if (!StringUtil.isEmpty(urls)){
@@ -145,6 +152,25 @@ public abstract class AbstractClient implements Client {
             }
         } else {
             //2、get provider list from registry
+            providers = consumerConfig.subscribe(new Consumer<RegClient>() {
+                     @Override
+                     public void accept(RegClient regClient) {
+                         regClient.onDiscoveryEvent(Constants.PROVIDER_ADD_EVENT, ssfurl -> {
+                             Provider provider = new Provider();
+                             provider.setIp(ssfurl.getIp());
+                             provider.setPort(ssfurl.getPort());
+                             buildConnections(Arrays.asList(provider));
+                         });
+                         regClient.onDiscoveryEvent(Constants.PROVIDER_REMOVE_EVENT, ssfurl -> {
+                             Provider provider = new Provider();
+                             provider.setIp(ssfurl.getIp());
+                             provider.setPort(ssfurl.getPort());
+                             connectionManager.removeConnection(provider);
+                         });
+                     }
+                 }
+            );
+
         }
         return providers;
     }
@@ -161,6 +187,9 @@ public abstract class AbstractClient implements Client {
      * @param providers
      */
     protected void buildConnections(List<Provider> providers){
+        if (providers == null || providers.isEmpty()){
+            return;
+        }
         final String interfaceName = consumerConfig.getServiceInterfaceName();
         int threadNum = Math.min(10, providers.size());
         final CountDownLatch downLatch = new CountDownLatch(threadNum);
@@ -177,27 +206,19 @@ public abstract class AbstractClient implements Client {
             dreamwork.execute(new AbstractDreamTask() {
                 @Override
                 public void run() {
-                    Connection connection = new Connection(provider);
+                    Connection connection = null;
                     try {
-                        ClientTransport clientTransport = getClientTransport(
-                                buildKey(consumerConfig.getProtocol(), provider.getIp(), provider.getPort()),
-                                ClientTransportConfig.build(consumerConfig)
-                        );
-                        connection.setTransport(clientTransport);
-                        if (connectionManager.doubleCheck(interfaceName,connection)){
-                            printSuccess(interfaceName,provider,connection);
-                            connection.setState(ALIVE);
-                        } else {
-                            printFailure(interfaceName,provider);
-                            connection.setState(RETRY);
+                        try {
+                            TimeUnit.MILLISECONDS.sleep(50);
+                        } catch (InterruptedException e) {
                         }
-                    } catch (Exception e){
-                        printFailure(interfaceName, provider, e);
-                        connection.setState(DEAD);
-                    } finally {
+                        connection = buildConnection(interfaceName, provider);
+                    }finally {
                         downLatch.countDown();
                     }
-                    connectionManager.addConnection(connection);
+                    if (connection != null){
+                        connectionManager.addConnection(connection);
+                    }
                 }
             });
         }
@@ -229,6 +250,34 @@ public abstract class AbstractClient implements Client {
             default:
                 return new RandomLoadBalance();
         }
+    }
+
+    private Connection buildConnection(String interfaceName,Provider provider){
+        Connection connection = new Connection(provider);
+        ClientTransportFactory.ClientTransportKey key =
+                buildKey(consumerConfig.getProtocol(), provider.getIp(), provider.getPort());
+        ClientTransport clientTransport = null;
+        try {
+            clientTransport = getClientTransport(
+                    key,
+                    ClientTransportConfig.build(consumerConfig)
+            );
+            //connect
+            connection.setTransport(key, clientTransport);
+            clientTransport.connect();
+            if (connectionManager.doubleCheck(interfaceName,connection)){
+                printSuccess(interfaceName,provider,connection);
+                connection.setState(ALIVE);
+            } else {
+                printFailure(interfaceName,provider);
+                connection.setState(RETRY);
+            }
+        } catch (Exception e){
+            printFailure(interfaceName, provider, e);
+            connection.setTransport(key, clientTransport);
+            connection.setState(DEAD);
+        }
+        return connection;
     }
 
 

@@ -67,7 +67,7 @@ public class ServerConfig {
             setPort(actualBoundPort);
         }
         for (ProviderConfig providerConfig : providerConfigs){
-            providerConfig.doExport();
+            providerConfig.doExport(this);
         }
         Server server = ServerManager.getServer(this);
         server.start();
@@ -93,6 +93,7 @@ public class ServerConfig {
 
     public void addProvider(ProviderConfig providerConfig){
         if (!providerConfigs.contains(providerConfig)){
+            providerConfig.setProtocol(ProtocolType.valueOf(getProtocol().toUpperCase()));
             providerConfigs.add(providerConfig);
         }
     }

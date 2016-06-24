@@ -7,14 +7,24 @@ import com.jiaxy.ssf.client.cluster.FailfastClient;
 import com.jiaxy.ssf.client.cluster.FailoverClient;
 import com.jiaxy.ssf.common.Constants;
 import com.jiaxy.ssf.common.ProtocolType;
+import com.jiaxy.ssf.common.bo.SSFURL;
+import com.jiaxy.ssf.common.bo.SubscribeURL;
 import com.jiaxy.ssf.exception.InitException;
 import com.jiaxy.ssf.intercept.MessageInvocationFactory;
 import com.jiaxy.ssf.processor.ConsumerProcessor;
 import com.jiaxy.ssf.processor.MessageProcessor;
 import com.jiaxy.ssf.proxy.ProxyType;
 import com.jiaxy.ssf.proxy.ServiceProxyFactory;
+import com.jiaxy.ssf.regcenter.client.RegClient;
+import com.jiaxy.ssf.regcenter.client.RegClientFactory;
+import com.jiaxy.ssf.registry.Provider;
 import com.jiaxy.ssf.service.GenericService;
 import com.jiaxy.ssf.util.Callbacks;
+import com.jiaxy.ssf.util.SSFContext;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Title: <br>
@@ -40,7 +50,6 @@ public class ConsumerConfig<T> extends SSFConfig{
      */
     private int timeout = 5000;
 
-    private ProtocolType protocol;
 
     /**
      * direct url
@@ -110,6 +119,7 @@ public class ConsumerConfig<T> extends SSFConfig{
         if (client != null){
             client.close();
         }
+        unSubscribe();
     }
 
 
@@ -127,6 +137,31 @@ public class ConsumerConfig<T> extends SSFConfig{
         return getServiceInterfaceClass();
     }
 
+    public List<Provider> subscribe(Consumer<RegClient> callback){
+        List<RegistryConfig> registryConfigs = getRegistries();
+        if (registryConfigs == null || registryConfigs.isEmpty()){
+            throw new InitException("reg center address is empty");
+        }
+        List<Provider> providers = new ArrayList<>();
+        for (RegistryConfig config:registryConfigs){
+            RegClient regClient = RegClientFactory.getRegClient(config.getRegisterAddresses());
+            List<SSFURL> ssfurls = regClient.subscribe(buildSubscribeURL()).getProviderList();
+            callback.accept(regClient);
+            if (ssfurls != null && !ssfurls.isEmpty()){
+                providers.addAll(getSubscribeProviders(ssfurls));
+            }
+        }
+        return providers;
+    }
+
+    public void unSubscribe(){
+        List<RegistryConfig> registryConfigs = getRegistries();
+        for (RegistryConfig config:registryConfigs){
+            RegClient regClient = RegClientFactory.getRegClient(config.getRegisterAddresses());
+            regClient.unSubscribe(buildSubscribeURL());
+        }
+    }
+
 
     private void buildClient(){
         switch (this.getStrategy()){
@@ -140,6 +175,34 @@ public class ConsumerConfig<T> extends SSFConfig{
                 client = new FailoverClient(this);
                 break;
         }
+    }
+
+    private List<Provider> getSubscribeProviders(List<SSFURL> ssfurls){
+        if (ssfurls != null){
+            List<Provider> providers = new ArrayList<>();
+            for (SSFURL ssfurl:ssfurls){
+                Provider provider = new Provider();
+                provider.setIp(ssfurl.getIp());
+                provider.setPort(ssfurl.getPort());
+                providers.add(provider);
+            }
+            return providers;
+        }
+        return null;
+
+    }
+
+    public SubscribeURL buildSubscribeURL(){
+        SubscribeURL subscribeURL = new SubscribeURL();
+        SSFURL ssfurl = new SSFURL();
+        ssfurl.setIp(SSFContext.getLocalHost());
+        ssfurl.setPid(SSFContext.getPID());
+        ssfurl.setServiceName(getServiceInterfaceName());
+        ssfurl.setAlias(getAlias());
+        ssfurl.setProtocol(getProtocol().getValue());
+        ssfurl.setStartTime(System.currentTimeMillis());
+        subscribeURL.setSourceURL(ssfurl);
+        return subscribeURL;
     }
 
     /**
@@ -157,14 +220,6 @@ public class ConsumerConfig<T> extends SSFConfig{
 
     public int methodTimeout(String method){
         return (Integer)getMethodConfigValue(method,TIMEOUT,getTimeout());
-    }
-
-    public ProtocolType getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(ProtocolType protocol) {
-        this.protocol = protocol;
     }
 
     public String getUrl() {
@@ -294,4 +349,6 @@ public class ConsumerConfig<T> extends SSFConfig{
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
+
+
 }

@@ -1,7 +1,6 @@
 package com.jiaxy.ssf.connection;
 
 import com.jiaxy.ssf.registry.Provider;
-import com.jiaxy.ssf.transport.client.ClientTransport;
 import com.jiaxy.ssf.util.NetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +64,6 @@ public class ConnectionManager implements Observer {
         if (logger.isTraceEnabled()){
             snapshot();
         }
-        snapshot();
-
     }
 
 
@@ -83,7 +80,32 @@ public class ConnectionManager implements Observer {
                 addDeadConnection(connection.getProvider(),connection);
                 break;
         }
+        logger.info("add provider:{}",connection.getProvider());
+        snapshot();
     }
+
+
+    public void removeConnection(Provider provider){
+        Lock writeLock = lock.writeLock();
+        writeLock.lock();
+        try {
+            Connection connection = aliveConnections.remove(provider);
+            if (connection == null){
+                connection = retryConnections.remove(provider);
+                if (connection == null){
+                    connection = deadConnections.remove(provider);
+                }
+            }
+            if (connection != null){
+                logger.info("remove provider:{}",connection.getProvider());
+                connection.close();
+            }
+        } finally {
+            writeLock.unlock();
+        }
+        snapshot();
+    }
+
 
     public Connection getAliveConnection(Provider provider){
         Connection connection = aliveConnections.get(provider);
@@ -189,13 +211,16 @@ public class ConnectionManager implements Observer {
 
     private void snapshot(){
         StringBuffer conns = new StringBuffer();
-        conns.append("alive connections:\n")
+        conns.append("\nalive connections:\n")
+                .append("\t")
                 .append(aliveConnections)
-                .append("\n,")
+                .append(",\n")
                 .append("retry connections:\n")
+                .append("\t")
                 .append(retryConnections)
-                .append("\n,")
+                .append(",\n")
                 .append("dead connections:\n")
+                .append("\t")
                 .append(deadConnections)
                 .append("\n");
         logger.info(conns.toString());

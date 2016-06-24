@@ -16,6 +16,7 @@
         <slf4j.version>1.6.5</slf4j.version>
         <javassist.version>3.19.0-GA</javassist.version>
         <junit.version>4.10</junit.version>
+        <regclient.version>1.0-SNAPSHOT</regclient.version>
     </properties>
 
     <dependencies>
@@ -44,6 +45,11 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jiaxy.ssf</groupId>
+            <artifactId>ssf-regcenter-client</artifactId>
+            <version>${regclient.version}</version>
         </dependency>
 
 

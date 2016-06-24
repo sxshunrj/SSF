@@ -24,6 +24,7 @@ public class SubscribeCommand implements Command<SubscribeURL> {
     public SubscribeURL subscribeURL(){
         return subscribeURL;
     }
+
     @Override
     public CompactionMode compaction() {
         return CompactionMode.QUORUM;

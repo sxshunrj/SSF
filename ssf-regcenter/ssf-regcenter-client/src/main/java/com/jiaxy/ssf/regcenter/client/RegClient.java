@@ -2,6 +2,7 @@ package com.jiaxy.ssf.regcenter.client;
 
 import com.jiaxy.ssf.common.bo.SSFURL;
 import com.jiaxy.ssf.common.bo.SubscribeURL;
+import com.jiaxy.ssf.regcenter.DiscoveryEvent;
 
 /**
  * Title: <br>
@@ -48,5 +49,10 @@ public interface RegClient {
      */
     public boolean unSubscribe(SubscribeURL subscribeURL);
 
+
+    public boolean close();
+
+
+    public void onDiscoveryEvent(String eventKey,DiscoveryEvent event);
 
 }

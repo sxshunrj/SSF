@@ -6,6 +6,7 @@ import com.jiaxy.ssf.intercept.MessageInvocation;
 import com.jiaxy.ssf.message.RequestMessage;
 import com.jiaxy.ssf.message.ResponseMessage;
 import com.jiaxy.ssf.service.TestSuiteService;
+import com.jiaxy.ssf.util.NetUtil;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,11 @@ public class ConsumerConfigTest {
         consumerConfig = new ConsumerConfig<TestSuiteService>();
         consumerConfig.setServiceInterfaceName(TestSuiteService.class.getCanonicalName());
         consumerConfig.setAlias("ssf-test-suite");
-        consumerConfig.setUrl("ssf://127.0.0.1:31818?weight=200,ssf://127.0.0.1:31617");
+//        consumerConfig.setUrl("ssf://127.0.0.1:31818?weight=200,ssf://127.0.0.1:31617");
+        RegistryConfig registryConfig = new RegistryConfig();
+        String host = NetUtil.getLocalHost();
+        registryConfig.setRegisterAddresses(Arrays.asList(String.format("%s:61800",host),String.format("%s:61801",host),String.format("%s:61802",host)));
+        consumerConfig.setRegistries(Arrays.asList(registryConfig));
         consumerConfig.setProtocol(ProtocolType.SSF);
         consumerConfig.setRetries(0);
     }
