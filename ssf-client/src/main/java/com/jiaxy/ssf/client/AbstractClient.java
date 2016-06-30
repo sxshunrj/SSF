@@ -74,6 +74,7 @@ public abstract class AbstractClient implements Client {
 
     @Override
     public void close() {
+        //TODO release tcp connection
 
     }
 

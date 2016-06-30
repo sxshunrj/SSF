@@ -35,8 +35,8 @@ public class RCServer {
         String logDirectory = System.getProperty("user.home")+ File.separator+"rcserver"+File.separator+port;
         Address address = new Address(host,NetUtil.tryAvailablePort(host, NetUtil.tryAvailablePort(host, port)));
         List<Address> members = new ArrayList<>();
-        for (int i = 1;i < 3 ;i++){
-            Address member = new Address(host,NetUtil.tryAvailablePort(host, 61800 + i));
+        for (int i = 0;i < 3 ;i++){
+            Address member = new Address(host,61800 + i);
             members.add(member);
         }
         CopycatServer server = CopycatServer.builder(address)
