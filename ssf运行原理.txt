@@ -1,0 +1,60 @@
+
+Server启动过程：
+
+		初始化一个Provider
+				ProviderConfig<IService> providerConfig = new ProviderConfig<IService>();
+				providerConfig.setAlias("ssf-test-suite");									------------->ssf-test-suite
+				providerConfig.setServiceInterfaceName(IService.class.getCanonicalName());	------------->com.jiaxy.ssf.test.suite.IService
+				providerConfig.setRef(new ServiceImpl());									------------->com.jiaxy.ssf.test.suite.impl.ServiceImpl@46238a47
+
+		初始化一个Server
+				ServerConfig serverConfig = new ServerConfig();
+				serverConfig.setProtocol("ssf");
+				serverConfig.setPort(31919);
+				serverConfig.setEpoll(false);
+				
+		将Provider添加到Server中
+				serverConfig.addProvider(providerConfig);
+						1：获取当前服务器IP
+						2：将服务器上绑定指定的端口
+						3：本地存储Provider
+							uniqueKey=provider://com.jiaxy.ssf.test.suite.IService:ssf-test-suite
+							获取Provider的代理类----->interface com.jiaxy.ssf.test.suite.IService
+							DefaultProcessorManager.register()
+								Map processors   key=com.jiaxy.ssf.test.suite.IService:ssf-test-suite  value=Processor
+							ProviderManager.addExportedProvider()
+								Map providerExported   key=provider://com.jiaxy.ssf.test.suite.IService:ssf-test-suite   value=ProviderConfig
+						
+		启动Server
+				Server.start();
+					Netty！！！
+						1：初始化io.netty.channel.socket.nio.NioServerSocketChannel
+						
+
+						
+						
+						
+						
+客户端请求过程：
+		初始化一个Consumer
+				ConsumerConfig<IService> consumerConfig = new ConsumerConfig<IService>();
+				consumerConfig.setServiceInterfaceName(IService.class.getCanonicalName());					------------->com.jiaxy.ssf.test.suite.IService
+				consumerConfig.setAlias("ssf-test-suite");													------------->ssf-test-suite
+				consumerConfig.setUrl("ssf://10.253.9.192:31919?weight=200,ssf://10.253.9.192:31919");
+				consumerConfig.setProtocol(ProtocolType.SSF);									
+				consumerConfig.setRetries(0);
+				consumerConfig.setTimeout(10000);
+		
+		获取代理类
+				初始化Client
+				JDKDynamicProxy生成代理类	
+			
+			
+
+		调用业务方法				
+						
+						
+						
+						
+						
+		
